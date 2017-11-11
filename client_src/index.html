@@ -1,10 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
+    <meta charset="utf-8">
+    <title>i_am_a_ball game</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-$END$
+    <div id="viewport-frame">
+        <canvas id="canvas" width="600" height="600">
+            <div style="text-align: center; vertical-align: middle;">
+                Ваш браузер не поддерживает даже canvas
+            </div>
+        </canvas>
+    </div>
+    <div>
+        <button id="connect-button">Connect</button>
+    </div>
+    <form id="text-form">
+        <input type="text" id="message">
+        <input type="submit" value="Send">
+    </form>
+    <div id="received"></div>
+<!--<script>-->
+    <!--var socket = new WebSocket("ws://127.0.0.1:9002", "rust-websocket");-->
+    <!--socket.onmessage = function (event) {-->
+        <!--var received = document.getElementById("received");-->
+        <!--var br = document.createElement("BR");-->
+        <!--var text = document.createTextNode(event.data);-->
+        <!--received.appendChild(br);-->
+        <!--received.appendChild(text);-->
+    <!--};-->
+
+    <!--function send(element) {-->
+        <!--var input = document.getElementById(element);-->
+        <!--socket.send(input.value);-->
+        <!--input.value = "";-->
+    <!--}-->
+<!--</script>-->
+<!--<p id="received">-->
+    <!--<strong>Received Messages:</strong>-->
+<!--</p>-->
+<!--<form onsubmit="send('message'); return false">-->
+    <!--<input type="text" id="message">-->
+    <!--<input type="submit" value="Send">-->
+<!--</form>-->
+
+
+    <script type="text/javascript" src="js/arena.js"></script>
+    <script type="text/javascript" src="js/player.js"></script>
+    <script type="text/javascript" src="js/wsController.js"></script>
+    <script type="text/javascript" src="js/game.js"></script>
 </body>
 </html>
