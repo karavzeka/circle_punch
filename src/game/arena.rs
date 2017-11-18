@@ -17,9 +17,9 @@ impl Arena {
         }
     }
 
-//    pub fn add_player(&mut self, player: Player) {
-//        self.players.push(player);
-//    }
+    pub fn add_player(&mut self, player: Player) {
+        self.players.lock().unwrap().push(player);
+    }
 
     pub fn test_method(&mut self) -> i32 {
         67
