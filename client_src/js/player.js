@@ -2,8 +2,9 @@
 
 class Player
 {
-    constructor(name, isMain = false)
+    constructor(id, name, isMain = false)
     {
+        this.id = id;
         this.name = name;
         this.isMain = isMain;
 
@@ -34,6 +35,18 @@ class Player
     {
         this.posX = Math.random() * (this._arena.getCanvas().width - 4 * this.radius) + 2 * this.radius;
         this.posY = Math.random() * (this._arena.getCanvas().height - 4 * this.radius) + 2 * this.radius;
+    }
+
+    /**
+     * Выставляет положение пользователя
+     *
+     * @param posX
+     * @param posY
+     */
+    setPosition(posX, posY)
+    {
+        this.posX = posX;
+        this.posY = posY;
     }
 
     /**

@@ -1,37 +1,47 @@
 extern crate websocket;
 
 use super::Arena;
-use super::command::PlayerCmd;
-use std::net::TcpStream;
-use std::sync::{Arc, Mutex};
+use super::command::{PlayerCmd, MoveTo};
 
+use std::net::TcpStream;
+
+pub const PLAYER_RADIUS: f32 = 16.0;
 
 pub struct Player {
-    id: String,
-    command: Option<PlayerCmd>,
+    pub id: String,
+//    pub command: Option<PlayerCmd>,
     pub sender: websocket::sender::Writer<TcpStream>,
 
-//    arena: &'a Arena,
-    arena: Arc<Mutex<Option<Arena>>>,
-
-    pub x: i32,
-    y: i32,
+    pub x: f32,
+    pub y: f32,
+    pub r: f32,
 }
 
 impl Player {
-    pub fn new(id: String, sender: websocket::sender::Writer<TcpStream>, arena: Arc<Mutex<Option<Arena>>>) -> Player {
-//        let arena_inst = arena.lock().unwrap().as_mut().unwrap();
-        let i = arena.lock().unwrap().as_mut().unwrap().test_method();
-        let player = Player {
+    pub fn new(id: String, sender: websocket::sender::Writer<TcpStream>) -> Player {
+        Player {
             id: id,
-            command: None,
+//            command: None,
             sender: sender,
-//            arena: Arc::new(Mutex::new(None)),
-            arena: arena,
-            x: i,
-            y: 0,
-        };
-//        arena.lock().unwrap().as_mut().unwrap().players.lock().unwrap().push(player);
-        player
+            x: 0.0,
+            y: 0.0,
+            r: PLAYER_RADIUS,
+        }
+    }
+
+    pub fn set_position(&mut self, x: f32, y: f32) {
+        self.x = x;
+        self.y = y;
+    }
+
+    pub fn generate_cmd(&self) -> PlayerCmd {
+        PlayerCmd {
+            player_id: self.id.clone(),
+            it_is_you: false,
+            move_vector: MoveTo {
+                x: self.x,
+                y: self.y,
+            }
+        }
     }
 }

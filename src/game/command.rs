@@ -1,15 +1,24 @@
 use chrono::prelude::Utc;
 
-/// Команда игрока
+/// Команда игрока для сервера
 #[derive(Serialize, Deserialize)]
-pub struct Command {
+pub struct CommandIn {
     pub time: u64,
-    players: Vec<PlayerCmd>
+    pub player_id: String,
+    pub move_vector: MoveTo,
 }
 
-#[derive(Serialize, Deserialize)]
+/// Команда сервера для игрока
+#[derive(Serialize, Deserialize, Clone)]
+pub struct CommandOut {
+    pub time: u64,
+    pub players: Vec<PlayerCmd>
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct PlayerCmd {
-    player_id: String,
+    pub player_id: String,
+    pub it_is_you: bool,
 
     #[serde(skip_serializing_if = "MoveTo::is_stay")]
     pub move_vector: MoveTo,
@@ -17,27 +26,33 @@ pub struct PlayerCmd {
 
 /// Одна сетевая команда может передать 0, 1 или -1 по каждой из осей.
 /// При этом если за такт пришло от игрока 2 команды (сетевые задержки), то они суммируются.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct MoveTo {
-    pub x: i16,
-    pub y: i16,
+    pub x: f32,
+    pub y: f32,
 }
-
+//TODO add to CommandIn
+//pub struct MoveTo {
+//    pub x: f32,
+//    pub y: f32,
+//}
+//TODO rename to Position
 impl MoveTo {
     fn is_stay(&self) -> bool {
         match (self.x, self.y) {
-            (0, 0) => true,
+            //TODO danger! Floating point accurately compare with zero!
+            (0.0, 0.0) => true,
             _ => false
         }
     }
 }
 
-impl Command {
-    pub fn new() -> Command {
+impl CommandOut {
+    pub fn new() -> CommandOut {
         let now = Utc::now();
         let ts = (now.timestamp() * 1_000) as u64 + now.timestamp_subsec_millis() as u64;
 
-        Command {
+        CommandOut {
             time: ts,
             players: Vec::new(),
         }

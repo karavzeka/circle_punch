@@ -7,21 +7,24 @@ extern crate serde;
 extern crate serde_json;
 extern crate websocket;
 extern crate chrono;
+extern crate rand;
 
 mod game;
 mod config;
 
-use std::env;
 use std::thread;
-use std::path::Path;
 use std::sync::{Arc, Mutex};
-use std::collections::HashMap;
+use std::sync::mpsc;
 use std::time::{Duration, Instant};
+use std::collections::VecDeque;
+use std::ops::DerefMut;
 use websocket::{Message, OwnedMessage};
 use websocket::sync::Server;
+use chrono::prelude::Utc;
+use rand::{thread_rng, Rng};
 
-use game::{Game, Player};
-use game::command::Command;
+use game::{Game};
+use game::command::{CommandIn, CommandOut, MoveTo};
 
 const GAME_CONF_PATH: &str = "config-rs/game.json";
 const FPS: u64 = 60u64;
@@ -30,61 +33,53 @@ const TICK_MS: u64 = (1000u64 / FPS);
 fn main() {
     let mut game = Game::new();
     game.init();
+    let mut game_glob = Arc::new(Mutex::new(game));
 
-    let mut players = Arc::new(Mutex::new(Vec::new() as Vec<Player>));
-    let arena = Arc::new(Mutex::new(game.arena));
-
-//    let player = Player {};
-//    let arena = Arc::new(game.get_arena().unwrap().players);
-//    let mut hm: HashMap<String, websocket::sender::Writer<_>> = HashMap::new();
-//    let sender_map = Arc::new(Mutex::new(hm));
+    let (command_tx, command_rx) = mpsc::channel();
 
     // Network processing
     let server = Server::bind("127.0.0.1:9002").unwrap();
 
     let now = Instant::now();
 
-    let players_for_send = players.clone();
-
-//    let mut cmd = Command::new();
-//    let j = serde_json::to_string(&cmd).unwrap();
-//    println!("{}", j);
-
+    // Send result commands to users
+    let game_glob_copy = game_glob.clone();
     let handler = thread::spawn(move || {
         loop {
             thread::sleep(Duration::from_millis(TICK_MS));
-            let mut players = players_for_send.lock().unwrap();
-            let cmd = Command::new();
-//            cmd.add_player_cmd(Player)
-            for player in players.iter_mut() {
-                player.sender.send_message(&OwnedMessage::Text("zxczcx".to_string())).unwrap();
-                println!("Unix ts: {} ms", cmd.time);
-//                println!("Current time: {} + {}", now.elapsed().as_secs(), now.elapsed().subsec_nanos() / 1_000_000);
-            }
+            game_glob_copy.lock().unwrap().update();
         }
     });
 
+    // Process incoming commands
+    let mut game_glob_copy = game_glob.clone();
+    let handler = thread::spawn(move || {
+        loop {
+            let cmd: CommandIn = command_rx.recv().unwrap();
+            game_glob_copy.lock().unwrap().process_command(cmd);
+//            println!("Recieved x: {}, y: {}", cmd.move_vector.x, cmd.move_vector.y);
+        }
+    });
+
+    // Process user connections and incoming messages
     for connection in server.filter_map(Result::ok) {
-//        let arena = arena.clone();
+        // Open new socket connection
         let client = connection.accept().unwrap();
 
         let player_id = format!("{}", client.peer_addr().unwrap());
-        println!("Client is connected: {:?}", format!("{}", player_id));
+        println!("Client is connected: {:?}", player_id);
 
         let (mut receiver, mut sender) = client.split().unwrap();
 
-        let mut player = Player::new(player_id.clone(), sender, arena.clone());
-//        arena.lock().unwrap().as_mut().unwrap().players.lock().unwrap().push(player);
-//        player.arena = arena.clone();
-//        players.lock().unwrap().push(player);
-        println!("x: {}", player.x);
+        // Creating new player
+        game_glob.lock().unwrap().make_player(player_id.clone(), sender);
 
+        // Listen connections and process incoming messages
+        let game_glob_copy = game_glob.clone();
+//        let commands_in_queue_copy = commands_in_queue.clone();
+//        let queue_counter_copy = queue_counter.clone();
+        let command_tx = command_tx.clone();
         thread::spawn(move || {
-
-            // Create new player and put his into arena
-//            let a = arena.lock().unwrap().as_mut().unwrap().test_method();
-//            println!("{}", a);
-
             for message in receiver.incoming_messages() {
                 let message = match message {
                     Ok(message) => message,
@@ -98,13 +93,27 @@ fn main() {
                 match message {
                     OwnedMessage::Text(txt) => {
                         println!("Input message: {:?}", txt);
-//                        sender.send_message(&OwnedMessage::Text(txt)).unwrap();
+                        let now = Utc::now();
+                        let ts = (now.timestamp() * 1_000) as u64 + now.timestamp_subsec_millis() as u64;
+                        let mut rng = thread_rng();
+                        let cmd_in = CommandIn {
+                            time: ts,
+                            player_id: player_id.clone(),
+                            move_vector: MoveTo {
+                                x: rng.gen_range(-1, 2) as f32,
+                                y: rng.gen_range(-1, 2) as f32,
+                            }
+                        };
+                        println!("x: {:?}", cmd_in.move_vector.x);
+                        println!("y: {:?}", cmd_in.move_vector.y);
+                        command_tx.send(cmd_in);
                     }
                     OwnedMessage::Binary(bin) => {
 //                        sender.send_message(&OwnedMessage::Binary(bin)).unwrap();
                     }
                     OwnedMessage::Close(_) => {
-                        println!("Client closed connection: {:?}", player_id);
+                        println!("Client closed connection: {}", player_id);
+                        game_glob_copy.lock().unwrap().remove_player(player_id.clone());
 //                        sender.send_message(&OwnedMessage::Close(None)).ok();
                         return;
                     }
@@ -114,7 +123,6 @@ fn main() {
                     _ => (),
                 };
             }
-
         });
     }
 }

@@ -5,7 +5,7 @@ class Arena
     constructor(canvas)
     {
         this.canvas = canvas;
-        this._players = [];
+        this.players = {};
         this.mainPlayer = null;
     }
 
@@ -21,8 +21,29 @@ class Arena
      */
     addPlayer(player)
     {
-        this._players.push(player);
+        this.players[player.id] = player;
         player.setArena(this);
+    }
+
+    /**
+     * Существует ли указанный игрок в стеке игроков
+     *
+     * @param playerId
+     * @returns {boolean}
+     */
+    issetPlayer(playerId) {
+        return this.players[playerId] !== undefined;
+    }
+
+    /**
+     * Возвращает указанного игрока
+     *
+     * @param playerId
+     * @returns {*}
+     */
+    getPlayer(playerId)
+    {
+        return this.players[playerId];
     }
 
     /**
@@ -33,6 +54,26 @@ class Arena
     setMainPlayer(player)
     {
         this.mainPlayer = player;
+    }
+
+    /**
+     * Установлен ли главный игрок
+     *
+     * @returns {boolean}
+     */
+    issetMainPlayer()
+    {
+        return this.mainPlayer !== undefined;
+    }
+
+    /**
+     * Возвращает главного играка
+     *
+     * @returns {*|null}
+     */
+    getMainPlayer()
+    {
+        return this.mainPlayer;
     }
 
     /**
@@ -47,20 +88,20 @@ class Arena
     /**
      * Инициализация арены
      */
-    init()
-    {
-        for (let player of this._players) {
-            player.respawn();
-        }
-    }
+    // init()
+    // {
+    //     for (let player of this.players) {
+    //         player.respawn();
+    //     }
+    // }
 
     /**
      * Обновление состояния арены
      */
     update()
     {
-        for (let player of this._players) {
-            player.update();
+        for (let player_id in this.players) {
+            this.players[player_id].update();
         }
     }
 
@@ -70,8 +111,8 @@ class Arena
     draw()
     {
         this.clearCanvas();
-        for (let player of this._players) {
-            player.draw();
+        for (let player_id in this.players) {
+            this.players[player_id].draw();
         }
     }
 }

@@ -56,7 +56,7 @@ class WsController
     setListener(callback)
     {
         if (this.connection instanceof WebSocket) {
-            // Если сокет уже слушектся, то заменяем ему обработчик события
+            // Если сокет уже слушается, то заменяем ему обработчик события
             this.connection.removeEventListener('message');
             this.connection.addEventListener('message', callback);
         } else {

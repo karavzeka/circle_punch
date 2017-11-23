@@ -27,7 +27,7 @@ function initCanvas() {
 }
 
 // Set up event handling
-function initEvents() {
+function initEvents(arena) {
     document.addEventListener("keydown", function (event) {
         input.keys[event.keyCode] = true;
 
@@ -39,44 +39,56 @@ function initEvents() {
         event.preventDefault();
     });
 
+    let serverCmd = new ServerCmd(arena);
+    WsController.getInstance()
+        .setListener(function(event) {
+            serverCmd.process(event.data);
+
+            arena.update();
+            arena.draw();
+
+            WsController.getInstance().send("It must be player command");
+        });
+
     document.getElementById('connect-button').addEventListener('click', function () {
         WsController.getInstance()
-            .setListener(function(event) {
-                let received = document.getElementById("received");
-                let br = document.createElement("BR");
-                let text = document.createTextNode(event.data);
-                received.appendChild(br);
-                received.appendChild(text);
-                console.log(WsController.getInstance().isOpen());
-            })
+            // .setListener(function(event) {
+            //     let received = document.getElementById("received");
+            //     let br = document.createElement("BR");
+            //     let text = document.createTextNode(event.data);
+            //     received.appendChild(br);
+            //     received.appendChild(text);
+            //     console.log(WsController.getInstance().isOpen());
+            // })
             .connect();
     });
 
-    document.getElementById('text-form').addEventListener('submit', function (event) {
-        event.preventDefault();
-        let input = document.getElementById('message');
-        WsController.getInstance().send(input.value);
-    });
+    // document.getElementById('text-form').addEventListener('submit', function (event) {
+    //     event.preventDefault();
+    //     let input = document.getElementById('message');
+    //     WsController.getInstance().send(input.value);
+    // });
+
+
 }
 
 function runGame(arena)
 {
     // console.log('game cycle');
-    arena.update();
-    arena.draw();
-    setTimeout(function () {runGame(arena);}, DT * 1000);
+    // arena.update();
+    // arena.draw();
+    // setTimeout(function () {runGame(arena);}, DT * 1000);
 }
 
 if (initCanvas()) {
-    initEvents();
-
     let arena = new Arena(canvas);
+    initEvents(arena);
 
-    let player = new Player('Super', true);
-    let player_1 = new Player('Player_1', false);
-    arena.addPlayer(player);
-    arena.addPlayer(player_1);
-    arena.init();
+    // let player = new Player('Super', true);
+    // let player_1 = new Player('Player_1', false);
+    // arena.addPlayer(player);
+    // arena.addPlayer(player_1);
+    // arena.init();
 
     runGame(arena);
     // console.log(input);
