@@ -8,11 +8,25 @@ let input = {
     keys: new Array(256),
 };
 
-const VK_W = 87;
-const VK_A = 65;
-const VK_S = 83;
-const VK_D = 68;
-const VK_SPACE = 32;
+// const VK_W = 87;
+// const VK_A = 65;
+// const VK_S = 83;
+// const VK_D = 68;
+// const VK_SPACE = 32;
+const GAME_KEYS = {
+    // Game codes
+    VK_W: 87,
+    VK_A: 65,
+    VK_S: 83,
+    VK_D: 68,
+    VK_SPACE: 32,
+    // Common codes (to check is the pressed key is  the game key)
+    87: true,
+    65: true,
+    83: true,
+    68: true,
+    32: true,
+};
 
 const FPS = 60;
 const DT = 1/FPS;
@@ -29,9 +43,17 @@ function initCanvas() {
 // Set up event handling
 function initEvents(arena) {
     document.addEventListener("keydown", function (event) {
-        input.keys[event.keyCode] = true;
+        if (!isKeyPressed(event.keyCode) && document.activeElement.tagName !== 'INPUT' && GAME_KEYS[event.keyCode] !== undefined) {
+            input.keys[event.keyCode] = true;
 
-        event.preventDefault();
+            let player = arena.getMainPlayer();
+            if (player !== null) {
+
+                player.updateCmd();
+            }
+
+            event.preventDefault();
+        }
     });
 
     document.addEventListener("keyup", function (event) {
@@ -47,19 +69,22 @@ function initEvents(arena) {
             arena.update();
             arena.draw();
 
-            WsController.getInstance().send("It must be player command");
+            // WsController.getInstance().send("It must be player command");
+            let player = arena.getMainPlayer();
+            player.updateCmd();
+            let playerCmd = player.getCmd();
+            playerCmd.prepare();
+            if (!playerCmd.isEmpty()) {
+                console.log(JSON.stringify(playerCmd));
+                WsController.getInstance().send(JSON.stringify(playerCmd));
+            }
+            playerCmd.toDefault();
+
+            System.updateFPS();
         });
 
     document.getElementById('connect-button').addEventListener('click', function () {
         WsController.getInstance()
-            // .setListener(function(event) {
-            //     let received = document.getElementById("received");
-            //     let br = document.createElement("BR");
-            //     let text = document.createTextNode(event.data);
-            //     received.appendChild(br);
-            //     received.appendChild(text);
-            //     console.log(WsController.getInstance().isOpen());
-            // })
             .connect();
     });
 

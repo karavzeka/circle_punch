@@ -7,13 +7,14 @@ use GAME_CONF_PATH;
 use config::Config;
 use std::net::TcpStream;
 use std::collections::HashMap;
-use game::command::{CommandIn, CommandOut, MoveTo};
+use game::command::{CommandIn, CommandOut, Position};
 use chrono::prelude::Utc;
 use websocket::{OwnedMessage};
 
 pub struct Game {
     pub arena: Option<Arena>,
     pub players: HashMap<String, Player>,
+    pub disconnected_players: Vec<String>,
 }
 
 impl Game {
@@ -21,6 +22,7 @@ impl Game {
         Game {
             arena: None,
             players: HashMap::new(),
+            disconnected_players: Vec::new(),
         }
     }
 
@@ -45,11 +47,17 @@ impl Game {
     /// Remove palayer
     pub fn remove_player(&mut self, player_id: String) {
         self.players.remove(&player_id);
+        self.disconnected_players.push(player_id);
     }
 
     /// Process player command
     pub fn process_command(&mut self, cmd: CommandIn) {
-        let mut player = self.players.get_mut(&cmd.player_id).unwrap();
+        let mut player = match self.players.get_mut(&cmd.player_id) {
+            Some(player) => player,
+            None => {
+                panic!("Player '{}' not found in stack.", &cmd.player_id);
+            }
+        };
         player.x += cmd.move_vector.x;
         player.y += cmd.move_vector.y;
     }
@@ -60,15 +68,13 @@ impl Game {
         let ts = (now.timestamp() * 1_000) as u64 + now.timestamp_subsec_millis() as u64;
         let mut cmd = CommandOut {
             time: ts,
-            players: vec![]
+            players: Vec::new(),
+            disconnected_players: self.disconnected_players.clone(),
         };
 
         for (_, player) in self.players.iter_mut() {
             let player_cmd = player.generate_cmd();
             cmd.players.push(player_cmd);
-
-//            let json = serde_json::to_string(&cmd).unwrap();
-//            player.sender.send_message(&OwnedMessage::Text(json)).unwrap();
         }
 
         for i in 0..cmd.players.len() {

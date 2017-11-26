@@ -12,14 +12,21 @@
                 Ваш браузер не поддерживает даже canvas
             </div>
         </canvas>
+        <div id="game-info">
+            <div>
+                <span>FPS:</span>
+                <span id="fps">∞</span>
+            </div>
+            <div>
+                <input type="text" id="server-ip" value="127.0.0.1">
+                <button id="connect-button">Connect</button>
+            </div>
+        </div>
     </div>
-    <div>
-        <button id="connect-button">Connect</button>
-    </div>
-    <form id="text-form">
-        <input type="text" id="message">
-        <input type="submit" value="Send">
-    </form>
+    <!--<form id="text-form">-->
+        <!--<input type="text" id="message">-->
+        <!--<input type="submit" value="Send">-->
+    <!--</form>-->
     <div id="received"></div>
 <!--<script>-->
     <!--var socket = new WebSocket("ws://127.0.0.1:9002", "rust-websocket");-->
@@ -46,10 +53,12 @@
 <!--</form>-->
 
 
-    <script type="text/javascript" src="js/arena.js"></script>
-    <script type="text/javascript" src="js/player.js"></script>
-    <script type="text/javascript" src="js/wsController.js"></script>
+    <script type="text/javascript" src="js/Arena.js"></script>
+    <script type="text/javascript" src="js/Player.js"></script>
+    <script type="text/javascript" src="js/WsController.js"></script>
     <script type="text/javascript" src="js/ServerCmd.js"></script>
+    <script type="text/javascript" src="js/PlayerCmd.js"></script>
+    <script type="text/javascript" src="js/System.js"></script>
     <script type="text/javascript" src="js/game.js"></script>
 </body>
 </html>

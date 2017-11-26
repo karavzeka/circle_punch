@@ -36,6 +36,15 @@ class Arena
     }
 
     /**
+     * Удаляет игрока из стека
+     *
+     * @param playserId
+     */
+    removePlayer(playserId) {
+        delete this.players[playserId];
+    }
+
+    /**
      * Возвращает указанного игрока
      *
      * @param playerId
@@ -54,6 +63,7 @@ class Arena
     setMainPlayer(player)
     {
         this.mainPlayer = player;
+        this.mainPlayer.setArena(this);
     }
 
     /**
@@ -63,7 +73,7 @@ class Arena
      */
     issetMainPlayer()
     {
-        return this.mainPlayer !== undefined;
+        return this.mainPlayer !== null;
     }
 
     /**
@@ -111,6 +121,7 @@ class Arena
     draw()
     {
         this.clearCanvas();
+        this.mainPlayer.draw();
         for (let player_id in this.players) {
             this.players[player_id].draw();
         }

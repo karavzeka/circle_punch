@@ -1,3 +1,9 @@
 #canvas {
     border: solid #000000 1px;
+    float: left;
+}
+
+#game-info {
+    float: left;
+    margin-left: 20px;
 }

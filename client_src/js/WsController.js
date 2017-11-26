@@ -1,6 +1,6 @@
 'use strict';
 
-const IP = '127.0.0.1';
+const DEFAULT_IP = '127.0.0.1';
 const PORT = '9002';
 
 let wsGuardCounter = 0;
@@ -35,14 +35,18 @@ class WsController
     /**
      * Выполняет соединение с сервером
      */
-    connect()
+    connect(serverIp = '')
     {
         if (this.onMessageCallback === null) {
             throw new Error('Socket listener is undefined. You should set callback function.');
         }
 
         if (!(this.connection instanceof WebSocket)) {
-            this.connection = new WebSocket('ws://' + IP + ':' + PORT, "rust-websocket");
+            let ip = DEFAULT_IP;
+            if (serverIp) {
+                ip = serverIp;
+            }
+            this.connection = new WebSocket('ws://' + ip + ':' + PORT, 'rust-websocket');
             this.connection.addEventListener('message', this.onMessageCallback);
         }
     }

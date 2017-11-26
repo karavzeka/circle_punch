@@ -24,7 +24,7 @@ use chrono::prelude::Utc;
 use rand::{thread_rng, Rng};
 
 use game::{Game};
-use game::command::{CommandIn, CommandOut, MoveTo};
+use game::command::{CommandIn, CommandOut, MoveVector};
 
 const GAME_CONF_PATH: &str = "config-rs/game.json";
 const FPS: u64 = 60u64;
@@ -93,31 +93,21 @@ fn main() {
                 match message {
                     OwnedMessage::Text(txt) => {
                         println!("Input message: {:?}", txt);
-                        let now = Utc::now();
-                        let ts = (now.timestamp() * 1_000) as u64 + now.timestamp_subsec_millis() as u64;
-                        let mut rng = thread_rng();
-                        let cmd_in = CommandIn {
-                            time: ts,
-                            player_id: player_id.clone(),
-                            move_vector: MoveTo {
-                                x: rng.gen_range(-1, 2) as f32,
-                                y: rng.gen_range(-1, 2) as f32,
-                            }
-                        };
-                        println!("x: {:?}", cmd_in.move_vector.x);
-                        println!("y: {:?}", cmd_in.move_vector.y);
+                        //TODO catch error
+                        let mut cmd_in: CommandIn = serde_json::from_str(&txt).unwrap();
+                        cmd_in.player_id = player_id.clone();
+//                        println!("{:?}", cmd_in);
                         command_tx.send(cmd_in);
-                    }
-                    OwnedMessage::Binary(bin) => {
-//                        sender.send_message(&OwnedMessage::Binary(bin)).unwrap();
                     }
                     OwnedMessage::Close(_) => {
                         println!("Client closed connection: {}", player_id);
                         game_glob_copy.lock().unwrap().remove_player(player_id.clone());
+                        //TODO complete
 //                        sender.send_message(&OwnedMessage::Close(None)).ok();
                         return;
                     }
                     OwnedMessage::Ping(data) => {
+                        //TODO complete
 //                        sender.send_message(&OwnedMessage::Pong(data)).unwrap();
                     }
                     _ => (),
