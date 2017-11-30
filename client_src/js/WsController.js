@@ -16,6 +16,7 @@ class WsController
         WsController.wsController = new WsController();
         this.connection = null;
         this.onMessageCallback = null;
+        this.onOpenCallback = null;
         this.onErrorCallback = null;
         this.onCloseCallback = null;
     }
@@ -52,6 +53,9 @@ class WsController
             this.connection = new WebSocket('ws://' + ip + ':' + PORT, 'rust-websocket');
             this.connection.addEventListener('message', this.onMessageCallback);
 
+            if (this.onOpenCallback) {
+                this.connection.addEventListener('open', this.onOpenCallback);
+            }
             if (this.onErrorCallback) {
                 this.connection.addEventListener('error', this.onErrorCallback);
             }
@@ -77,6 +81,11 @@ class WsController
             // Иначе записываем обработчик в переменную для дальнейшего использования
             this.onMessageCallback = callback;
         }
+        return this;
+    }
+
+    setOnOpen(callback) {
+        this.onOpenCallback = callback;
         return this;
     }
 

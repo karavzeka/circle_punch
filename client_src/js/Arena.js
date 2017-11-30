@@ -96,16 +96,6 @@ class Arena
     }
 
     /**
-     * Инициализация арены
-     */
-    // init()
-    // {
-    //     for (let player of this.players) {
-    //         player.respawn();
-    //     }
-    // }
-
-    /**
      * Обновление состояния арены
      */
     update()

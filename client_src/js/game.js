@@ -62,28 +62,18 @@ function initEvents(arena) {
     });
 
     let serverCmd = new ServerCmd(arena);
-    WsController.getInstance()
+    let wsController = WsController.getInstance();
+    wsController
         .setListener(function (event) {
             serverCmd.process(event.data);
-            System.updateFPS();
-// TODO отправку сообщений в отдельный цикл по таймауту
-            arena.update();
-            arena.draw();
-            //
-            // // WsController.getInstance().send("It must be player command");
-            let player = arena.getMainPlayer();
-            player.updateCmd();
-            let playerCmd = player.getCmd();
-            playerCmd.prepare();
-            if (!playerCmd.isEmpty()) {
-                console.log(JSON.stringify(playerCmd));
-                WsController.getInstance().send(JSON.stringify(playerCmd));
-            }
-            playerCmd.toDefault();
-
         });
 
-    WsController.getInstance()
+    wsController
+        .setOnOpen(function (event) {
+            runGame(arena);
+        });
+
+    wsController
         .setOnClose(function (event) {
             let notificationElement = document.getElementById('ws-notification');
             let element = document.createElement('div');
@@ -96,25 +86,28 @@ function initEvents(arena) {
 
     document.getElementById('connect-button').addEventListener('click', function () {
         let serverIp = document.getElementById('server-ip').value;
-        WsController.getInstance()
-            .connect(serverIp);
+        wsController.connect(serverIp);
     });
-
-    // document.getElementById('text-form').addEventListener('submit', function (event) {
-    //     event.preventDefault();
-    //     let input = document.getElementById('message');
-    //     WsController.getInstance().send(input.value);
-    // });
-
-
 }
 
 function runGame(arena)
 {
-    // console.log('game cycle');
-    // arena.update();
-    // arena.draw();
-    // setTimeout(function () {runGame(arena);}, DT * 1000);
+    if (arena.issetMainPlayer()) {
+        arena.update();
+        arena.draw();
+        let player = arena.getMainPlayer();
+        player.updateCmd();
+        let playerCmd = player.getCmd();
+        playerCmd.prepare();
+        if (!playerCmd.isEmpty()) {
+            console.log(JSON.stringify(playerCmd));
+            WsController.getInstance().send(JSON.stringify(playerCmd));
+        }
+        playerCmd.toDefault();
+        //TODO interrupt game on close connection
+    }
+    System.updateFPS();
+    setTimeout(function () {runGame(arena);}, DT * 1000);
 }
 
 if (initCanvas()) {
@@ -127,6 +120,6 @@ if (initCanvas()) {
     // arena.addPlayer(player_1);
     // arena.init();
 
-    runGame(arena);
+    // runGame(arena);
     // console.log(input);
 }
