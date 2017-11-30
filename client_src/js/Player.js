@@ -9,7 +9,7 @@ class Player
         this.isMain = isMain;
         this.cmd = null;
         if (isMain) {
-            this.cmd = new PlayerCmd();
+            this.cmd = new ClientCmd();
         }
 
         this.arena = null;

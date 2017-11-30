@@ -63,13 +63,14 @@ function initEvents(arena) {
 
     let serverCmd = new ServerCmd(arena);
     WsController.getInstance()
-        .setListener(function(event) {
+        .setListener(function (event) {
             serverCmd.process(event.data);
-
+            System.updateFPS();
+// TODO отправку сообщений в отдельный цикл по таймауту
             arena.update();
             arena.draw();
-
-            // WsController.getInstance().send("It must be player command");
+            //
+            // // WsController.getInstance().send("It must be player command");
             let player = arena.getMainPlayer();
             player.updateCmd();
             let playerCmd = player.getCmd();
@@ -80,12 +81,23 @@ function initEvents(arena) {
             }
             playerCmd.toDefault();
 
-            System.updateFPS();
+        });
+
+    WsController.getInstance()
+        .setOnClose(function (event) {
+            let notificationElement = document.getElementById('ws-notification');
+            let element = document.createElement('div');
+            element.textContent = 'Disconnected [' + WsController.getCloseReason(event) + ']';
+            notificationElement.appendChild(element);
+            setTimeout(function () {
+                element.remove();
+            }, 20000);
         });
 
     document.getElementById('connect-button').addEventListener('click', function () {
+        let serverIp = document.getElementById('server-ip').value;
         WsController.getInstance()
-            .connect();
+            .connect(serverIp);
     });
 
     // document.getElementById('text-form').addEventListener('submit', function (event) {

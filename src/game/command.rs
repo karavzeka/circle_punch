@@ -2,7 +2,7 @@ use chrono::prelude::Utc;
 
 /// Команда игрока для сервера
 #[derive(Serialize, Deserialize, Debug)]
-pub struct CommandIn {
+pub struct ClientCmd {
 //    pub time: u64,
 //    #[serde(default = "default_player_id")]
     #[serde(default)]
@@ -15,7 +15,7 @@ pub struct CommandIn {
 
 /// Команда сервера для игрока
 #[derive(Serialize, Deserialize, Clone)]
-pub struct CommandOut {
+pub struct ServerCmd {
     pub time: u64,
     pub players: Vec<PlayerCmd>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -57,7 +57,7 @@ impl Position {
     }
 }
 
-impl CommandOut {
+impl ServerCmd {
 //    pub fn new() -> CommandOut {
 //        let now = Utc::now();
 //        let ts = (now.timestamp() * 1_000) as u64 + now.timestamp_subsec_millis() as u64;

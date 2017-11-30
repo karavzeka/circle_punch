@@ -1,6 +1,6 @@
 'use strict';
 
-class PlayerCmd
+class ClientCmd
 {
     constructor()
     {

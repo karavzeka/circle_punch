@@ -24,7 +24,7 @@ use chrono::prelude::Utc;
 use rand::{thread_rng, Rng};
 
 use game::{Game};
-use game::command::{CommandIn, CommandOut, MoveVector};
+use game::command::{ClientCmd, ServerCmd, MoveVector};
 
 const GAME_CONF_PATH: &str = "config-rs/game.json";
 const FPS: u64 = 60u64;
@@ -38,7 +38,7 @@ fn main() {
     let (command_tx, command_rx) = mpsc::channel();
 
     // Network processing
-    let server = Server::bind("127.0.0.1:9002").unwrap();
+    let server = Server::bind("0.0.0.0:9002").unwrap();
 
     let now = Instant::now();
 
@@ -55,7 +55,7 @@ fn main() {
     let mut game_glob_copy = game_glob.clone();
     let handler = thread::spawn(move || {
         loop {
-            let cmd: CommandIn = command_rx.recv().unwrap();
+            let cmd: ClientCmd = command_rx.recv().unwrap();
             game_glob_copy.lock().unwrap().process_command(cmd);
 //            println!("Recieved x: {}, y: {}", cmd.move_vector.x, cmd.move_vector.y);
         }
@@ -94,7 +94,7 @@ fn main() {
                     OwnedMessage::Text(txt) => {
                         println!("Input message: {:?}", txt);
                         //TODO catch error
-                        let mut cmd_in: CommandIn = serde_json::from_str(&txt).unwrap();
+                        let mut cmd_in: ClientCmd = serde_json::from_str(&txt).unwrap();
                         cmd_in.player_id = player_id.clone();
 //                        println!("{:?}", cmd_in);
                         command_tx.send(cmd_in);

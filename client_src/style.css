@@ -6,4 +6,9 @@
 #game-info {
     float: left;
     margin-left: 20px;
+    max-width: 620px;
+}
+
+#ws-error {
+    color: darkred;
 }

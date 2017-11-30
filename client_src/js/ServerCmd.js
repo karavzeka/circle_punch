@@ -8,6 +8,7 @@ class ServerCmd
 
     process(json) {
         let cmd = JSON.parse(json);
+        console.log('Server ts: ' + cmd.time);
         // console.log(cmd);
         for (let playerCmd of cmd.players) {
             let playerId = playerCmd.player_id;

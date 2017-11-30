@@ -7,7 +7,7 @@ use GAME_CONF_PATH;
 use config::Config;
 use std::net::TcpStream;
 use std::collections::HashMap;
-use game::command::{CommandIn, CommandOut, Position};
+use game::command::{ClientCmd, ServerCmd, Position};
 use chrono::prelude::Utc;
 use websocket::{OwnedMessage};
 
@@ -51,7 +51,7 @@ impl Game {
     }
 
     /// Process player command
-    pub fn process_command(&mut self, cmd: CommandIn) {
+    pub fn process_command(&mut self, cmd: ClientCmd) {
         let mut player = match self.players.get_mut(&cmd.player_id) {
             Some(player) => player,
             None => {
@@ -66,7 +66,7 @@ impl Game {
     pub fn update(&mut self) {
         let now = Utc::now();
         let ts = (now.timestamp() * 1_000) as u64 + now.timestamp_subsec_millis() as u64;
-        let mut cmd = CommandOut {
+        let mut cmd = ServerCmd {
             time: ts,
             players: Vec::new(),
             disconnected_players: self.disconnected_players.clone(),
