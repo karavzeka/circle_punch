@@ -14,6 +14,7 @@ pub struct Player {
     pub x: f32,
     pub y: f32,
     pub r: f32,
+    pub mass: f32,
 }
 
 impl Player {
@@ -24,6 +25,7 @@ impl Player {
             x: 0.0,
             y: 0.0,
             r: PLAYER_RADIUS,
+            mass: PLAYER_RADIUS * PLAYER_RADIUS,
         }
     }
 

@@ -38,10 +38,10 @@ class Arena
     /**
      * Удаляет игрока из стека
      *
-     * @param playserId
+     * @param playerId
      */
-    removePlayer(playserId) {
-        delete this.players[playserId];
+    removePlayer(playerId) {
+        delete this.players[playerId];
     }
 
     /**
@@ -84,6 +84,15 @@ class Arena
     getMainPlayer()
     {
         return this.mainPlayer;
+    }
+
+    /**
+     * Удаляет всех игроков
+     */
+    removeAllPlayers()
+    {
+        this.players = {};
+        this.mainPlayer = null;
     }
 
     /**
