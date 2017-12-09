@@ -3,8 +3,6 @@ use chrono::prelude::Utc;
 /// Команда игрока для сервера
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ClientCmd {
-//    pub time: u64,
-//    #[serde(default = "default_player_id")]
     #[serde(default)]
     pub player_id: String,
     #[serde(default)]
@@ -42,33 +40,16 @@ pub struct Position {
 #[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct MoveVector {
     #[serde(default)]
-    pub x: f32,
+    pub x: i16,
     #[serde(default)]
-    pub y: f32,
+    pub y: i16,
 }
 
 impl Position {
     fn is_stay(&self) -> bool {
-        match (self.x, self.y) {
-            //TODO danger! Floating point accurately compare with zero!
-            (0.0, 0.0) => true,
+        match (self.x.is_normal(), self.y.is_normal()) {
+            (false, false) => true, // zero
             _ => false
         }
-    }
-}
-
-impl ServerCmd {
-//    pub fn new() -> CommandOut {
-//        let now = Utc::now();
-//        let ts = (now.timestamp() * 1_000) as u64 + now.timestamp_subsec_millis() as u64;
-//
-//        CommandOut {
-//            time: ts,
-//            players: Vec::new(),
-//        }
-//    }
-
-    pub fn add_player_cmd(&mut self, cmd: PlayerCmd) {
-        self.players.push(cmd);
     }
 }

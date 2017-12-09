@@ -8,9 +8,11 @@ extern crate serde_json;
 extern crate websocket;
 extern crate chrono;
 extern crate rand;
+extern crate cgmath;
 
 mod game;
 mod config;
+mod controller;
 
 use std::thread;
 use std::sync::{Arc, Mutex};
@@ -47,7 +49,7 @@ fn main() {
     let handler = thread::spawn(move || {
         loop {
             thread::sleep(Duration::from_millis(TICK_MS));
-            game_glob_copy.lock().unwrap().update();
+            game_glob_copy.lock().unwrap().update(TICK_MS as f32 / 1000.0);
         }
     });
 
@@ -69,15 +71,14 @@ fn main() {
         let player_id = format!("{}", client.peer_addr().unwrap());
         println!("Client is connected: {:?}", player_id);
 
-        let (mut receiver, mut sender) = client.split().unwrap();
+        let (mut receiver, sender) = client.split().unwrap();
 
         // Creating new player
         game_glob.lock().unwrap().make_player(player_id.clone(), sender);
 
         // Listen connections and process incoming messages
         let game_glob_copy = game_glob.clone();
-//        let commands_in_queue_copy = commands_in_queue.clone();
-//        let queue_counter_copy = queue_counter.clone();
+
         let command_tx = command_tx.clone();
         thread::spawn(move || {
             for message in receiver.incoming_messages() {
@@ -85,19 +86,26 @@ fn main() {
                     Ok(message) => message,
                     Err(e) => {
                         println!("{:?}", e);
-//                        let _ = sender.send_message(&Message::close());
                         return;
                     }
                 };
 
                 match message {
                     OwnedMessage::Text(txt) => {
-                        println!("Input message: {:?}", txt);
-                        //TODO catch error
-                        let mut cmd_in: ClientCmd = serde_json::from_str(&txt).unwrap();
+//                        println!("Input message: {:?}", txt);
+
+                        let mut cmd_in: ClientCmd;
+                        match serde_json::from_str(&txt) {
+                            Ok(cmd) => {
+                                cmd_in = cmd;
+                            }
+                            Err(e) => {
+                                println!("Input message parse err: {:?}", e);
+                                return;
+                            }
+                        }
                         cmd_in.player_id = player_id.clone();
-//                        println!("{:?}", cmd_in);
-                        command_tx.send(cmd_in);
+                        command_tx.send(cmd_in).unwrap();
                     }
                     OwnedMessage::Close(_) => {
                         println!("Client closed connection: {}", player_id);

@@ -8,6 +8,7 @@ use config::Config;
 use std::net::TcpStream;
 use std::collections::HashMap;
 use game::command::{ClientCmd, ServerCmd, Position};
+use controller::CollisionController;
 use chrono::prelude::Utc;
 use websocket::{OwnedMessage};
 
@@ -15,6 +16,7 @@ pub struct Game {
     pub arena: Option<Arena>,
     pub players: HashMap<String, Player>,
     pub disconnected_players: Vec<String>,
+    pub collision_controller: CollisionController,
 }
 
 impl Game {
@@ -23,6 +25,7 @@ impl Game {
             arena: None,
             players: HashMap::new(),
             disconnected_players: Vec::new(),
+            collision_controller: CollisionController::new(),
         }
     }
 
@@ -58,12 +61,12 @@ impl Game {
                 panic!("Player '{}' not found in stack.", &cmd.player_id);
             }
         };
-        player.x += cmd.move_vector.x;
-        player.y += cmd.move_vector.y;
+
+        player.set_move_to(cmd.move_vector.x, cmd.move_vector.y);
     }
 
     /// Send game state to all players
-    pub fn update(&mut self) {
+    pub fn update(&mut self, dt: f32) {
         let now = Utc::now();
         let ts = (now.timestamp() * 1_000) as u64 + now.timestamp_subsec_millis() as u64;
         let mut cmd = ServerCmd {
@@ -72,11 +75,34 @@ impl Game {
             disconnected_players: self.disconnected_players.clone(),
         };
 
-        for (_, player) in self.players.iter_mut() {
-            let player_cmd = player.generate_cmd();
+        let player_ids: Vec<String> = self.players.keys().map(|key| key.clone()).collect();
+        for (i, player_id_i) in player_ids.iter().enumerate() {
+            // Updating player state
+            {
+                let player_out = self.players.get_mut(player_id_i).unwrap();
+                player_out.update(dt);
+            }
+            // Finding player-player collisions
+            {
+                let player_out = self.players.get(player_id_i).unwrap();
+                for (_, player_id_j) in player_ids.iter().skip(i + 1).enumerate() {
+                    let player_in = self.players.get(player_id_j).unwrap();
+
+                    self.collision_controller.find_for_player_player(player_out, player_in);
+                }
+                // Immutable borrow of player_out ends here
+            }
+
+            // Applying collisions
+            let player_out = self.players.get_mut(player_id_i).unwrap();
+            self.collision_controller.apply_for_player(player_out);
+
+            // Generation player command
+            let player_cmd = player_out.generate_cmd();
             cmd.players.push(player_cmd);
         }
 
+        // Individual modification and sending command
         for i in 0..cmd.players.len() {
             cmd.players[i].it_is_you = true;
             let player = self.players.get_mut(&cmd.players[i].player_id).unwrap();
