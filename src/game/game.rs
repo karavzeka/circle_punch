@@ -79,26 +79,26 @@ impl Game {
         for (i, player_id_i) in player_ids.iter().enumerate() {
             // Updating player state
             {
-                let player_out = self.players.get_mut(player_id_i).unwrap();
-                player_out.update(dt);
+                let player_i = self.players.get_mut(player_id_i).unwrap();
+                player_i.update(dt);
             }
             // Finding player-player collisions
             {
-                let player_out = self.players.get(player_id_i).unwrap();
+                let player_i = self.players.get(player_id_i).unwrap();
                 for (_, player_id_j) in player_ids.iter().skip(i + 1).enumerate() {
-                    let player_in = self.players.get(player_id_j).unwrap();
+                    let player_j = self.players.get(player_id_j).unwrap();
 
-                    self.collision_controller.find_for_player_player(player_out, player_in);
+                    self.collision_controller.detect_player_vs_player(player_i, player_j);
                 }
-                // Immutable borrow of player_out ends here
+                // Immutable borrow of player_i ends here
             }
 
             // Applying collisions
-            let player_out = self.players.get_mut(player_id_i).unwrap();
-            self.collision_controller.apply_for_player(player_out);
+            let player_i = self.players.get_mut(player_id_i).unwrap();
+            self.collision_controller.apply_for_player(player_i);
 
             // Generation player command
-            let player_cmd = player_out.generate_cmd();
+            let player_cmd = player_i.generate_cmd();
             cmd.players.push(player_cmd);
         }
 
