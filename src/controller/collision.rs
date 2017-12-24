@@ -17,12 +17,11 @@ impl CollisionController {
     /// Check is there collision between players.
     /// If the collision occurs, the velocity modification vectors are calculated.
     pub fn detect_player_vs_player(&mut self, player_1: &Player, player_2: &Player) {
-        // TODO проверить, что все верно (избавился от корня (distance -> distance2))
-        let distance2 = player_1.pos.distance2(player_2.pos);
-        if distance2 <= (player_1.r + player_2.r).powi(2) {
+        let distance2 = player_1.body.pos.distance2(player_2.body.pos);
+        if distance2 <= (player_1.body.r + player_2.body.r).powi(2) {
             // Collision occurred
-            let norm_to_player_2 = (player_1.pos - player_2.pos).normalize();
-            let velocity_distinction = player_2.velocity - player_1.velocity;
+            let norm_to_player_2 = (player_1.body.pos - player_2.body.pos).normalize();
+            let velocity_distinction = player_2.body.velocity - player_1.body.velocity;
             let angle = velocity_distinction.angle(norm_to_player_2);
             let power = velocity_distinction.magnitude() * angle.cos().abs();
 
@@ -56,6 +55,6 @@ struct PlayerCollision {
 }
 impl PlayerCollision {
     pub fn apply(&self, player: &mut Player) {
-        player.velocity += self.recoil_velocity;
+        player.body.velocity += self.recoil_velocity;
     }
 }

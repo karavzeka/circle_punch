@@ -1,5 +1,5 @@
 use super::Player;
-use super::player::PLAYER_RADIUS;
+use super::player::DEFAULT_RADIUS as PLAYER_RADIUS;
 
 use std::sync::{Arc, Mutex};
 use std::collections::HashMap;

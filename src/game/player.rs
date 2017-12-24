@@ -7,7 +7,8 @@ use std::net::TcpStream;
 use std::cmp::Ordering;
 use cgmath::{Point2, Vector2, Zero};
 
-pub const PLAYER_RADIUS: f32 = 16.0;
+pub const DEFAULT_RADIUS: f32 = 16.0;
+pub const DEFAULT_MASS: f32 = 100.0;
 pub const MOVE_ACCELERATION: f32 = 1000.0;
 pub const FRICTION_ACCELERATION: f32 = 400.0;
 pub const MAX_VELOCITY: f32 = 100.0;
@@ -16,11 +17,8 @@ pub struct Player {
     pub id: String,
     pub sender: websocket::sender::Writer<TcpStream>,
 
-    pub pos: Point2<f32>,
-    pub velocity: Vector2<f32>,
-    pub acceleration: Vector2<f32>,
-    pub r: f32,
-//    pub mass: f32,
+    pub body: PlayerBody,
+
     // Actions
     pub move_to: Vector2<i16>
 }
@@ -30,11 +28,13 @@ impl Player {
         Player {
             id,
             sender,
-            pos: Point2::new(0.0, 0.0),
-            velocity: Vector2::zero(),
-            acceleration: Vector2::zero(),
-
-            r: PLAYER_RADIUS,
+            body: PlayerBody {
+                pos: Point2::new(0.0, 0.0),
+                velocity: Vector2::zero(),
+                acceleration: Vector2::zero(),
+                r: DEFAULT_RADIUS,
+                mass: DEFAULT_MASS,
+            },
 //            mass: PLAYER_RADIUS * PLAYER_RADIUS,
             // Actions
             move_to: Vector2::zero(),
@@ -42,8 +42,8 @@ impl Player {
     }
 
     pub fn set_position(&mut self, x: f32, y: f32) {
-        self.pos.x = x;
-        self.pos.y = y;
+        self.body.pos.x = x;
+        self.body.pos.y = y;
     }
 
     /// Sets the unit vector of the direction of motion
@@ -69,56 +69,54 @@ impl Player {
     /// Update player state
     pub fn update(&mut self, dt: f32) {
         self.update_velocity(dt);
-//        println!("move_to {:?}", self.move_to);
-//        println!("velocity {:?}", self.velocity);
-        self.pos.x += self.velocity.x * dt;
-        self.pos.y += self.velocity.y * dt;
+        self.body.pos.x += self.body.velocity.x * dt;
+        self.body.pos.y += self.body.velocity.y * dt;
 
         self.reset_move_to();
     }
 
     fn update_velocity(&mut self, dt: f32) {
         // Applying friction
-        if self.velocity.x.abs() > 0.0 {
-            if self.velocity.x > 0.0 {
-                self.velocity.x -= FRICTION_ACCELERATION * dt;
-                if self.velocity.x < 0.0 {
-                    self.velocity.x = 0.0;
+        if self.body.velocity.x.abs() > 0.0 {
+            if self.body.velocity.x > 0.0 {
+                self.body.velocity.x -= FRICTION_ACCELERATION * dt;
+                if self.body.velocity.x < 0.0 {
+                    self.body.velocity.x = 0.0;
                 }
             } else {
-                self.velocity.x += FRICTION_ACCELERATION * dt;
-                if self.velocity.x > 0.0 {
-                    self.velocity.x = 0.0;
+                self.body.velocity.x += FRICTION_ACCELERATION * dt;
+                if self.body.velocity.x > 0.0 {
+                    self.body.velocity.x = 0.0;
                 }
             }
         }
 
-        if self.velocity.y.abs() > 0.0 {
-            if self.velocity.y > 0.0 {
-                self.velocity.y -= FRICTION_ACCELERATION * dt;
-                if self.velocity.y < 0.0 {
-                    self.velocity.y = 0.0;
+        if self.body.velocity.y.abs() > 0.0 {
+            if self.body.velocity.y > 0.0 {
+                self.body.velocity.y -= FRICTION_ACCELERATION * dt;
+                if self.body.velocity.y < 0.0 {
+                    self.body.velocity.y = 0.0;
                 }
             } else {
-                self.velocity.y += FRICTION_ACCELERATION * dt;
-                if self.velocity.y > 0.0 {
-                    self.velocity.y = 0.0;
+                self.body.velocity.y += FRICTION_ACCELERATION * dt;
+                if self.body.velocity.y > 0.0 {
+                    self.body.velocity.y = 0.0;
                 }
             }
         }
 
         // Applying acceleration
-        self.velocity.x += self.move_to.x as f32 * MOVE_ACCELERATION * dt;
-        self.velocity.y += self.move_to.y as f32 * MOVE_ACCELERATION * dt;
-        if self.velocity.x > MAX_VELOCITY {
-            self.velocity.x = MAX_VELOCITY;
-        } else if self.velocity.x < -MAX_VELOCITY {
-            self.velocity.x = -MAX_VELOCITY
+        self.body.velocity.x += self.move_to.x as f32 * MOVE_ACCELERATION * dt;
+        self.body.velocity.y += self.move_to.y as f32 * MOVE_ACCELERATION * dt;
+        if self.body.velocity.x > MAX_VELOCITY {
+            self.body.velocity.x = MAX_VELOCITY;
+        } else if self.body.velocity.x < -MAX_VELOCITY {
+            self.body.velocity.x = -MAX_VELOCITY
         }
-        if self.velocity.y > MAX_VELOCITY {
-            self.velocity.y = MAX_VELOCITY;
-        } else if self.velocity.y < -MAX_VELOCITY {
-            self.velocity.y = -MAX_VELOCITY
+        if self.body.velocity.y > MAX_VELOCITY {
+            self.body.velocity.y = MAX_VELOCITY;
+        } else if self.body.velocity.y < -MAX_VELOCITY {
+            self.body.velocity.y = -MAX_VELOCITY
         }
     }
 
@@ -127,9 +125,17 @@ impl Player {
             player_id: self.id.clone(),
             it_is_you: false,
             position: Position {
-                x: self.pos.x,
-                y: self.pos.y,
+                x: self.body.pos.x,
+                y: self.body.pos.y,
             }
         }
     }
+}
+
+pub struct PlayerBody {
+    pub pos: Point2<f32>,
+    pub velocity: Vector2<f32>,
+    pub acceleration: Vector2<f32>,
+    pub r: f32,
+    pub mass: f32,
 }
