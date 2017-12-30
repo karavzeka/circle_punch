@@ -5,13 +5,14 @@ use super::command::{PlayerCmd, Position};
 
 use std::net::TcpStream;
 use std::cmp::Ordering;
-use cgmath::{Point2, Vector2, Zero};
+use cgmath::{Point2, Vector2, Zero, InnerSpace};
 
 pub const DEFAULT_RADIUS: f32 = 16.0;
 pub const DEFAULT_MASS: f32 = 100.0;
-pub const MOVE_ACCELERATION: f32 = 1000.0;
-pub const FRICTION_ACCELERATION: f32 = 400.0;
+pub const MOVE_FORCE: f32 = 30000.0;
+pub const FRICTION_FORCE: f32 = 15000.0;
 pub const MAX_VELOCITY: f32 = 100.0;
+pub const RESTITUTION: f32 = 0.6;
 
 pub struct Player {
     pub id: String,
@@ -34,8 +35,9 @@ impl Player {
                 acceleration: Vector2::zero(),
                 r: DEFAULT_RADIUS,
                 mass: DEFAULT_MASS,
+                inv_mass: 1.0 / DEFAULT_MASS,
             },
-//            mass: PLAYER_RADIUS * PLAYER_RADIUS,
+
             // Actions
             move_to: Vector2::zero(),
         }
@@ -76,47 +78,47 @@ impl Player {
     }
 
     fn update_velocity(&mut self, dt: f32) {
-        // Applying friction
-        if self.body.velocity.x.abs() > 0.0 {
+        let mut total_force = Vector2::zero();
+
+        let vel_abs_x = self.body.velocity.x.abs();
+        let vel_abs_y = self.body.velocity.y.abs();
+
+        // Applying friction.
+        if vel_abs_x > 0.0 {
             if self.body.velocity.x > 0.0 {
-                self.body.velocity.x -= FRICTION_ACCELERATION * dt;
-                if self.body.velocity.x < 0.0 {
-                    self.body.velocity.x = 0.0;
-                }
+                total_force.x -= FRICTION_FORCE;
             } else {
-                self.body.velocity.x += FRICTION_ACCELERATION * dt;
-                if self.body.velocity.x > 0.0 {
-                    self.body.velocity.x = 0.0;
-                }
+                total_force.x += FRICTION_FORCE;
             }
         }
-
-        if self.body.velocity.y.abs() > 0.0 {
+        if vel_abs_y > 0.0 {
             if self.body.velocity.y > 0.0 {
-                self.body.velocity.y -= FRICTION_ACCELERATION * dt;
-                if self.body.velocity.y < 0.0 {
-                    self.body.velocity.y = 0.0;
-                }
+                total_force.y -= FRICTION_FORCE;
             } else {
-                self.body.velocity.y += FRICTION_ACCELERATION * dt;
-                if self.body.velocity.y > 0.0 {
-                    self.body.velocity.y = 0.0;
-                }
+                total_force.y += FRICTION_FORCE;
             }
         }
 
-        // Applying acceleration
-        self.body.velocity.x += self.move_to.x as f32 * MOVE_ACCELERATION * dt;
-        self.body.velocity.y += self.move_to.y as f32 * MOVE_ACCELERATION * dt;
-        if self.body.velocity.x > MAX_VELOCITY {
-            self.body.velocity.x = MAX_VELOCITY;
-        } else if self.body.velocity.x < -MAX_VELOCITY {
-            self.body.velocity.x = -MAX_VELOCITY
+        // Applying move force
+        if !self.move_to.is_zero() {
+            // If velocity >= max velocity then movie force = friction force.
+            if vel_abs_x < MAX_VELOCITY {
+                total_force.x += self.move_to.x as f32 * MOVE_FORCE;
+            } else {
+                total_force.x += self.move_to.x as f32 * FRICTION_FORCE;
+            }
+            if vel_abs_y < MAX_VELOCITY {
+                total_force.y += self.move_to.y as f32 * MOVE_FORCE;
+            } else {
+                total_force.y += self.move_to.y as f32 * FRICTION_FORCE;
+            }
         }
-        if self.body.velocity.y > MAX_VELOCITY {
-            self.body.velocity.y = MAX_VELOCITY;
-        } else if self.body.velocity.y < -MAX_VELOCITY {
-            self.body.velocity.y = -MAX_VELOCITY
+
+        self.body.velocity += total_force * dt / self.body.mass;
+
+        // Disable the noise of velocity near zero velocity which friction force makes.
+        if self.move_to.is_zero() && vel_abs_x < 5.0 && vel_abs_y < 5.0 {
+            self.body.velocity = Vector2::zero();
         }
     }
 
@@ -138,4 +140,5 @@ pub struct PlayerBody {
     pub acceleration: Vector2<f32>,
     pub r: f32,
     pub mass: f32,
+    pub inv_mass: f32,
 }

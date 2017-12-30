@@ -5,4 +5,4 @@ pub mod command;
 
 pub use self::game::Game;
 pub use self::arena::{Arena};
-pub use self::player::Player;
+pub use self::player::{Player, RESTITUTION};
