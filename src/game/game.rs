@@ -7,9 +7,8 @@ use GAME_CONF_PATH;
 use config::Config;
 use std::net::TcpStream;
 use std::collections::HashMap;
-use game::command::{ClientCmd, ServerCmd, Position};
+use game::command::{ClientCmd, ServerCmd};
 use controller::CollisionController;
-use chrono::prelude::Utc;
 use websocket::{OwnedMessage};
 
 pub struct Game {
@@ -31,10 +30,11 @@ impl Game {
 
     pub fn init(&mut self) {
         let config = Config::load(GAME_CONF_PATH);
-        let arena = Arena::new(
+        let mut arena = Arena::new(
             config.get_raw("width").unwrap().as_i64().unwrap() as i32,
             config.get_raw("height").unwrap().as_i64().unwrap() as i32
         );
+        arena.load_map("config-rs/map.txt");
         self.arena = Some(arena);
     }
 
@@ -44,7 +44,9 @@ impl Game {
 
         let mut player = Player::new(player_id.clone(), sender);
         player.set_position(spawn_x, spawn_y);
+        self.send_map(&mut player);
         self.players.insert(player_id.clone(), player);
+
     }
 
     /// Remove palayer
@@ -55,7 +57,7 @@ impl Game {
 
     /// Process player command
     pub fn process_command(&mut self, cmd: ClientCmd) {
-        let mut player = match self.players.get_mut(&cmd.player_id) {
+        let player = match self.players.get_mut(&cmd.player_id) {
             Some(player) => player,
             None => {
                 panic!("Player '{}' not found in stack.", &cmd.player_id);
@@ -67,13 +69,8 @@ impl Game {
 
     /// Send game state to all players
     pub fn update(&mut self, dt: f32) {
-        let now = Utc::now();
-        let ts = (now.timestamp() * 1_000) as u64 + now.timestamp_subsec_millis() as u64;
-        let mut cmd = ServerCmd {
-            time: ts,
-            players: Vec::new(),
-            disconnected_players: self.disconnected_players.clone(),
-        };
+        let mut cmd = ServerCmd::new();
+        cmd.disconnected_players = self.disconnected_players.clone();
 
         let player_ids: Vec<String> = self.players.keys().map(|key| key.clone()).collect();
         for (i, player_id_i) in player_ids.iter().enumerate() {
@@ -90,6 +87,7 @@ impl Game {
 
                     self.collision_controller.detect_player_vs_player(player_i, player_j);
                 }
+                self.collision_controller.detect_player_vs_wall(player_i, self.arena.as_ref().unwrap().walls.as_ref());
                 // Immutable borrow of player_i ends here
             }
 
@@ -112,5 +110,18 @@ impl Game {
 
             cmd.players[i].it_is_you = false;
         }
+    }
+
+    /// Send map state
+    fn send_map(&self, player: &mut Player) {
+        let arena = self.arena.as_ref().unwrap();
+        let map_cmd = arena.generate_map_cmd();
+        let json = serde_json::to_string(&map_cmd).unwrap();
+        player.sender.send_message(&OwnedMessage::Text(json)).unwrap();
+    }
+
+    pub fn pong(&mut self, player_id: String, data: Vec<u8>) {
+        let player = self.players.get_mut(&player_id).unwrap();
+        player.sender.send_message(&OwnedMessage::Pong(data)).unwrap();
     }
 }

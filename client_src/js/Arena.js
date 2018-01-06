@@ -4,14 +4,20 @@ class Arena
 {
     constructor(canvas)
     {
-        this.canvas = canvas;
         this.players = {};
         this.mainPlayer = null;
+        // Canvas
+        this.canvas = canvas;
+        this.ctx = null;
+        this.walls2D = new Path2D();
     }
 
-    getCanvas()
+    getContext2D()
     {
-        return this.canvas;
+        if (this.ctx === null) {
+            this.ctx = this.canvas.getContext('2d');
+        }
+        return this.ctx;
     }
 
     /**
@@ -96,6 +102,19 @@ class Arena
     }
 
     /**
+     * Добавляет стену к canvas'у.
+     * Добавляется без возможности удаления.
+     *
+     * @param x
+     * @param y
+     * @param size
+     */
+    addWall(x, y, size)
+    {
+        this.walls2D.rect(x, y, size, size);
+    }
+
+    /**
      * Очищает холст
      */
     clearCanvas()
@@ -120,9 +139,17 @@ class Arena
     draw()
     {
         this.clearCanvas();
+        this.drawWalls();
         this.mainPlayer.draw();
         for (let player_id in this.players) {
             this.players[player_id].draw();
         }
+    }
+
+    drawWalls()
+    {
+        let ctx = this.getContext2D();
+        ctx.fillStyle = '#A00';
+        ctx.fill(this.walls2D);
     }
 }

@@ -1,18 +1,17 @@
 extern crate websocket;
 
-use super::Arena;
 use super::command::{PlayerCmd, Position};
 
 use std::net::TcpStream;
 use std::cmp::Ordering;
-use cgmath::{Point2, Vector2, Zero, InnerSpace};
+use cgmath::{Point2, Vector2, Zero};
 
 pub const DEFAULT_RADIUS: f32 = 16.0;
 pub const DEFAULT_MASS: f32 = 100.0;
 pub const MOVE_FORCE: f32 = 30000.0;
 pub const FRICTION_FORCE: f32 = 15000.0;
 pub const MAX_VELOCITY: f32 = 100.0;
-pub const RESTITUTION: f32 = 0.6;
+pub const RESTITUTION: f32 = 0.8;
 
 pub struct Player {
     pub id: String,

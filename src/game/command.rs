@@ -1,5 +1,12 @@
 use chrono::prelude::Utc;
 
+const CMD_TYPE_PLAYERS: &str = "players";
+const CMD_TYPE_MAP: &str = "map";
+
+trait CmdType<'a> {
+    fn get_cmd_type() -> &'a str;
+}
+
 /// Команда игрока для сервера
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ClientCmd {
@@ -13,11 +20,31 @@ pub struct ClientCmd {
 
 /// Команда сервера для игрока
 #[derive(Serialize, Deserialize, Clone)]
-pub struct ServerCmd {
+pub struct ServerCmd<'a> {
+    pub cmd_type: &'a str,
     pub time: u64,
     pub players: Vec<PlayerCmd>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub disconnected_players: Vec<String>,
+}
+
+impl<'a> ServerCmd<'a> {
+    pub fn new() -> ServerCmd<'a> {
+        let now = Utc::now();
+        let ts = (now.timestamp() * 1_000) as u64 + now.timestamp_subsec_millis() as u64;
+        ServerCmd {
+            cmd_type: ServerCmd::get_cmd_type(),
+            time: ts,
+            players: Vec::new(),
+            disconnected_players: Vec::new(),
+        }
+    }
+}
+
+impl<'a> CmdType<'a> for ServerCmd<'a> {
+    fn get_cmd_type() -> &'a str {
+        CMD_TYPE_PLAYERS
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -29,7 +56,7 @@ pub struct PlayerCmd {
     pub position: Position,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Position {
     pub x: f32,
     pub y: f32,
@@ -43,6 +70,42 @@ pub struct MoveVector {
     pub x: i16,
     #[serde(default)]
     pub y: i16,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct MapCmd<'a> {
+    pub cmd_type: &'a str,
+    pub walls: Vec<WallCmd>
+}
+
+impl<'a> MapCmd<'a> {
+    pub fn new() -> MapCmd<'a> {
+        MapCmd {
+            cmd_type: MapCmd::get_cmd_type(),
+            walls: Vec::new(),
+        }
+    }
+}
+
+impl<'a> CmdType<'a> for MapCmd<'a> {
+    fn get_cmd_type() -> &'a str {
+        CMD_TYPE_MAP
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WallCmd {
+    pub position: Position,
+    pub edge_size: f32,
+}
+
+impl WallCmd {
+    pub fn new(x: f32, y: f32) -> WallCmd {
+        WallCmd {
+            position: Position {x, y},
+            edge_size: super::wall::EDGE_SIZE,
+        }
+    }
 }
 
 impl Position {

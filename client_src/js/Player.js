@@ -16,8 +16,7 @@ class Player
         this.radius = 16;
         this.posX = 0;
         this.posY = 0;
-        this.color = 'rgba(0, 0, 200, 0.5)';
-        // this.speed = 0;
+        this.color = 'rgba(0, 0, 200, 0.7)';
 
         this.moveSpeed = 1.2;
     }
@@ -30,15 +29,6 @@ class Player
     setArena(arena)
     {
         this.arena = arena;
-    }
-
-    /**
-     * Случайно генерирует положение игрока для респауна
-     */
-    respawn()
-    {
-        this.posX = Math.random() * (this.arena.getCanvas().width - 4 * this.radius) + 2 * this.radius;
-        this.posY = Math.random() * (this.arena.getCanvas().height - 4 * this.radius) + 2 * this.radius;
     }
 
     /**
@@ -80,7 +70,7 @@ class Player
      */
     draw()
     {
-        let ctx = this.arena.getCanvas().getContext('2d');
+        let ctx = this.arena.getContext2D();
         ctx.beginPath();
         ctx.arc(Math.floor(this.posX), Math.floor(this.posY), this.radius, 0, Math.PI * 2, true);
         ctx.closePath();
