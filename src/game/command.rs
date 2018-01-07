@@ -75,13 +75,17 @@ pub struct MoveVector {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MapCmd<'a> {
     pub cmd_type: &'a str,
+    pub width: u32,
+    pub height: u32,
     pub walls: Vec<WallCmd>
 }
 
 impl<'a> MapCmd<'a> {
-    pub fn new() -> MapCmd<'a> {
+    pub fn new(width: u32, height:u32) -> MapCmd<'a> {
         MapCmd {
             cmd_type: MapCmd::get_cmd_type(),
+            width,
+            height,
             walls: Vec::new(),
         }
     }

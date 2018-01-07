@@ -30,10 +30,7 @@ impl Game {
 
     pub fn init(&mut self) {
         let config = Config::load(GAME_CONF_PATH);
-        let mut arena = Arena::new(
-            config.get_raw("width").unwrap().as_i64().unwrap() as i32,
-            config.get_raw("height").unwrap().as_i64().unwrap() as i32
-        );
+        let mut arena = Arena::new();
         arena.load_map("config-rs/map.txt");
         self.arena = Some(arena);
     }
