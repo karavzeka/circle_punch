@@ -50,7 +50,7 @@ class WsController
             if (serverIp) {
                 ip = serverIp;
             }
-            this.connection = new WebSocket('ws://' + ip + ':' + PORT, 'rust-websocket');
+            this.connection = new WebSocket('ws://' + ip + ':' + PORT);
             this.connection.addEventListener('message', this.onMessageCallback);
 
             if (this.onOpenCallback) {

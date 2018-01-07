@@ -79,7 +79,7 @@ fn main() {
                 let message = match message {
                     Ok(message) => message,
                     Err(e) => {
-                        println!("{:?}", e);
+                        println!("Incoming message error: {:?}", e);
                         return;
                     }
                 };
