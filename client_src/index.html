@@ -12,16 +12,19 @@
                 Ваш браузер не поддерживает даже canvas
             </div>
         </canvas>
-        <div id="game-info">
-            <div>
-                <span>FPS:</span>
-                <span id="fps">∞</span>
-            </div>
-            <div>
-                <input type="text" id="server-ip" value="127.0.0.1">
-                <button id="connect-button">Connect</button>
-            </div>
-            <div id="ws-notification"></div>
+    </div>
+    <div id="game-info">
+        <div>
+            <span>FPS:</span>
+            <span id="fps">∞</span>
+        </div>
+        <div>
+            <input type="text" id="server-ip" value="127.0.0.1">
+            <button id="connect-button">Connect</button>
+        </div>
+        <div id="ws-notification"></div>
+        <div>
+            <pre>w a s d - move</pre>
         </div>
     </div>
     <!--<form id="text-form">-->
@@ -56,6 +59,9 @@
 
     <script type="text/javascript" src="js/Arena.js"></script>
     <script type="text/javascript" src="js/Player.js"></script>
+    <script type="text/javascript" src="js/Wall.js"></script>
+    <script type="text/javascript" src="js/Camera.js"></script>
+    <script type="text/javascript" src="js/Bound.js"></script>
     <script type="text/javascript" src="js/WsController.js"></script>
     <script type="text/javascript" src="js/ServerCmd.js"></script>
     <script type="text/javascript" src="js/ClientCmd.js"></script>

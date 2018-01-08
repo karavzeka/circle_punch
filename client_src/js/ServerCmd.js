@@ -62,6 +62,9 @@ class ServerCmd
 
     processMapCmd(cmd)
     {
+        this.arena.setWidth(cmd.width);
+        this.arena.setHeight(cmd.height);
+
         if (cmd.walls === undefined) {
             return;
         }

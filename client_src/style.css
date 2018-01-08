@@ -1,6 +1,9 @@
+#viewport-frame {
+    float: left;
+}
+
 #canvas {
     border: solid #000000 1px;
-    float: left;
 }
 
 #game-info {

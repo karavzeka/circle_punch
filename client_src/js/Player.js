@@ -19,6 +19,8 @@ class Player
         this.color = 'rgba(0, 0, 200, 0.7)';
 
         this.moveSpeed = 1.2;
+
+        this.bound = new Bound();
     }
 
     /**
@@ -41,6 +43,22 @@ class Player
     {
         this.posX = posX;
         this.posY = posY;
+    }
+
+    /**
+     * Return bounds of the player
+     *
+     * @returns {Bound}
+     */
+    getBound()
+    {
+        this.bound.set(
+            this.posX - this.radius,
+            this.posX + this.radius,
+            this.posY - this.radius,
+            this.posY + this.radius
+        );
+        return this.bound;
     }
 
     /**
@@ -70,9 +88,13 @@ class Player
      */
     draw()
     {
+        if (!this.arena.camera.isVisible(this.getBound())) {
+            return;
+        }
+
         let ctx = this.arena.getContext2D();
         ctx.beginPath();
-        ctx.arc(Math.floor(this.posX), Math.floor(this.posY), this.radius, 0, Math.PI * 2, true);
+        ctx.arc(this.arena.camera.correctDrawX(this.posX), this.arena.camera.correctDrawY(this.posY), this.radius, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.fillStyle = this.color;
         ctx.fill();

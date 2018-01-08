@@ -6,10 +6,16 @@ class Arena
     {
         this.players = {};
         this.mainPlayer = null;
+        // Width and height of arena (not canvas)
+        this.width = 0;
+        this.height = 0;
         // Canvas
         this.canvas = canvas;
         this.ctx = null;
-        this.walls2D = new Path2D();
+        this.walls = [];
+
+        this.camera = new Camera(canvas.width, canvas.height);
+        this.camera.setArena(this);
     }
 
     getContext2D()
@@ -102,6 +108,26 @@ class Arena
     }
 
     /**
+     * Sets width of arena
+     *
+     * @param width
+     */
+    setWidth(width)
+    {
+        this.width = width;
+    }
+
+    /**
+     * Sets height of arena
+     *
+     * @param height
+     */
+    setHeight(height)
+    {
+        this.height = height;
+    }
+
+    /**
      * Добавляет стену к canvas'у.
      * Добавляется без возможности удаления.
      *
@@ -111,7 +137,9 @@ class Arena
      */
     addWall(x, y, size)
     {
-        this.walls2D.rect(x, y, size, size);
+        let wall = new Wall(x, y, size);
+        wall.setArena(this);
+        this.walls.push(wall);
     }
 
     /**
@@ -128,18 +156,24 @@ class Arena
      */
     update()
     {
+        this.camera.observeObject(this.mainPlayer.posX, this.mainPlayer.posY);
         for (let player_id in this.players) {
             this.players[player_id].update();
         }
     }
 
     /**
-     * Отрисовка арены
+     * Draw arena and its objects
      */
     draw()
     {
         this.clearCanvas();
         this.drawWalls();
+        this.drawPlayers();
+    }
+
+    drawPlayers()
+    {
         this.mainPlayer.draw();
         for (let player_id in this.players) {
             this.players[player_id].draw();
@@ -148,8 +182,8 @@ class Arena
 
     drawWalls()
     {
-        let ctx = this.getContext2D();
-        ctx.fillStyle = '#A00';
-        ctx.fill(this.walls2D);
+        for (let i = 0, len = this.walls.length; i < len; i++) {
+            this.walls[i].draw();
+        }
     }
 }
