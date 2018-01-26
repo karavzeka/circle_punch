@@ -102,16 +102,16 @@ class Player
 
     updateCmd()
     {
-        if (isKeyPressed(GAME_KEYS.VK_D)) {
+        if (isKeyPressed(GAME_KEYS.VK_D) || isKeyPressed(GAME_KEYS.VK_RIGHT)) {
             this.cmd.move_vector.x++;
         }
-        if (isKeyPressed(GAME_KEYS.VK_A)) {
+        if (isKeyPressed(GAME_KEYS.VK_A) || isKeyPressed(GAME_KEYS.VK_LEFT)) {
             this.cmd.move_vector.x--;
         }
-        if (isKeyPressed(GAME_KEYS.VK_W)) {
+        if (isKeyPressed(GAME_KEYS.VK_W) || isKeyPressed(GAME_KEYS.VK_UP)) {
             this.cmd.move_vector.y--;
         }
-        if (isKeyPressed(GAME_KEYS.VK_S)) {
+        if (isKeyPressed(GAME_KEYS.VK_S) || isKeyPressed(GAME_KEYS.VK_DOWN)) {
             this.cmd.move_vector.y++;
         }
         if (isKeyPressed(GAME_KEYS.VK_SPACE)) {

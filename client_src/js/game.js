@@ -12,12 +12,20 @@ const GAME_KEYS = {
     VK_A: 65,
     VK_S: 83,
     VK_D: 68,
+    VK_LEFT: 37,
+    VK_UP: 38,
+    VK_RIGHT: 39,
+    VK_DOWN: 40,
     VK_SPACE: 32,
     // Common codes (to check is the pressed key is  the game key)
     87: true,
     65: true,
     83: true,
     68: true,
+    37: true,
+    38: true,
+    39: true,
+    40: true,
     32: true,
 };
 
@@ -27,6 +35,9 @@ let global = {
 
 const FPS = 60;
 const DT = 1/FPS;
+
+let url = new URL(location.href);
+const DEBUG_MODE = url.searchParams.has('debug') && url.searchParams.get('debug');
 
 function isKeyPressed(code)
 {

@@ -13,6 +13,7 @@ extern crate cgmath;
 mod game;
 mod config;
 mod controller;
+mod json_struct;
 
 use std::thread;
 use std::sync::{Arc, Mutex};
@@ -24,7 +25,6 @@ use websocket::sync::Server;
 use game::{Game};
 use game::command::{ClientCmd};
 
-const GAME_CONF_PATH: &str = "config-rs/game.json";
 const FPS: u64 = 60u64;
 const TICK_MS: u64 = (1000u64 / FPS);
 

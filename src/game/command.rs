@@ -1,4 +1,5 @@
 use chrono::prelude::Utc;
+use cgmath::{Point2};
 
 const CMD_TYPE_PLAYERS: &str = "players";
 const CMD_TYPE_MAP: &str = "map";
@@ -77,7 +78,8 @@ pub struct MapCmd<'a> {
     pub cmd_type: &'a str,
     pub width: u32,
     pub height: u32,
-    pub walls: Vec<WallCmd>
+    pub walls: Vec<WallCmd>,
+    pub spikes: Vec<SpikeCmd>,
 }
 
 impl<'a> MapCmd<'a> {
@@ -87,6 +89,7 @@ impl<'a> MapCmd<'a> {
             width,
             height,
             walls: Vec::new(),
+            spikes: Vec::new(),
         }
     }
 }
@@ -107,9 +110,25 @@ impl WallCmd {
     pub fn new(x: f32, y: f32) -> WallCmd {
         WallCmd {
             position: Position {x, y},
-            edge_size: super::wall::EDGE_SIZE,
+            edge_size: super::EDGE_SIZE,
         }
     }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SpikeCmd {
+    pub draw_body: Line,
+    pub danger_body: Line,
+    pub normal: Position,
+    pub vec_along_spike: Position,
+    pub height: f32,
+    pub needle_half_width: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Line {
+    pub point_1: Position,
+    pub point_2: Position,
 }
 
 impl Position {

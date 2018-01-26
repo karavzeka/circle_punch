@@ -72,5 +72,47 @@ class ServerCmd
             let wall = cmd.walls[i];
             this.arena.addWall(wall.position.x, wall.position.y, wall.edge_size);
         }
+
+        if (cmd.spikes !== undefined) {
+            for (let i = 0; i < cmd.spikes.length; i++) {
+                let spike = cmd.spikes[i];
+                let drawBody = {
+                    point_1: {
+                        x: spike.draw_body.point_1.x,
+                        y: spike.draw_body.point_1.y
+                    },
+                    point_2: {
+                        x: spike.draw_body.point_2.x,
+                        y: spike.draw_body.point_2.y
+                    }
+                };
+                let dangerBody = {
+                    point_1: {
+                        x: spike.danger_body.point_1.x,
+                        y: spike.danger_body.point_1.y
+                    },
+                    point_2: {
+                        x: spike.danger_body.point_2.x,
+                        y: spike.danger_body.point_2.y
+                    }
+                };
+                let normal = {
+                    x: spike.normal.x,
+                    y: spike.normal.y
+                };
+                let vecAlongDpike = {
+                    x: spike.vec_along_spike.x,
+                    y: spike.vec_along_spike.y
+                };
+                this.arena.addSpike(
+                    drawBody,
+                    dangerBody,
+                    normal,
+                    vecAlongDpike,
+                    spike.height,
+                    spike.needle_half_width,
+                );
+            }
+        }
     }
 }

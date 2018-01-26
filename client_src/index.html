@@ -24,42 +24,15 @@
         </div>
         <div id="ws-notification"></div>
         <div>
-            <pre>w a s d - move</pre>
+            <pre>move - [w a s d] or [← ↑ → ↓]</pre>
         </div>
     </div>
-    <!--<form id="text-form">-->
-        <!--<input type="text" id="message">-->
-        <!--<input type="submit" value="Send">-->
-    <!--</form>-->
     <div id="received"></div>
-<!--<script>-->
-    <!--var socket = new WebSocket("ws://127.0.0.1:9002", "rust-websocket");-->
-    <!--socket.onmessage = function (event) {-->
-        <!--var received = document.getElementById("received");-->
-        <!--var br = document.createElement("BR");-->
-        <!--var text = document.createTextNode(event.data);-->
-        <!--received.appendChild(br);-->
-        <!--received.appendChild(text);-->
-    <!--};-->
-
-    <!--function send(element) {-->
-        <!--var input = document.getElementById(element);-->
-        <!--socket.send(input.value);-->
-        <!--input.value = "";-->
-    <!--}-->
-<!--</script>-->
-<!--<p id="received">-->
-    <!--<strong>Received Messages:</strong>-->
-<!--</p>-->
-<!--<form onsubmit="send('message'); return false">-->
-    <!--<input type="text" id="message">-->
-    <!--<input type="submit" value="Send">-->
-<!--</form>-->
-
 
     <script type="text/javascript" src="js/Arena.js"></script>
     <script type="text/javascript" src="js/Player.js"></script>
     <script type="text/javascript" src="js/Wall.js"></script>
+    <script type="text/javascript" src="js/Spike.js"></script>
     <script type="text/javascript" src="js/Camera.js"></script>
     <script type="text/javascript" src="js/Bound.js"></script>
     <script type="text/javascript" src="js/WsController.js"></script>

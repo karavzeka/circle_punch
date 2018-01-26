@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 class Wall
 {
@@ -28,12 +28,15 @@ class Wall
      */
     getBound()
     {
-        this.bound.set(
-            this.posX,
-            this.posX + this.edgeSize,
-            this.posY,
-            this.posY + this.edgeSize
-        );
+        if (!this.bound.isDefined()) {
+            this.bound.set(
+                this.posX,
+                this.posX + this.edgeSize,
+                this.posY,
+                this.posY + this.edgeSize
+            );
+            this.bound.setDefined();
+        }
         return this.bound;
     }
 
@@ -43,10 +46,11 @@ class Wall
             return;
         }
 
-        let ctx = this.arena.getContext2D();
-        ctx.beginPath();
         let x = this.arena.camera.correctDrawX(this.posX);
         let y = this.arena.camera.correctDrawY(this.posY);
+
+        let ctx = this.arena.getContext2D();
+        ctx.beginPath();
         ctx.rect(x, y, this.edgeSize, this.edgeSize);
         ctx.fillStyle = '#A00';
         ctx.fill();

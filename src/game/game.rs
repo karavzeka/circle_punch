@@ -3,13 +3,15 @@ extern crate serde_json;
 
 use super::{Arena, Player};
 
-use GAME_CONF_PATH;
 use config::Config;
 use std::net::TcpStream;
 use std::collections::HashMap;
+use std::path::Path;
 use game::command::{ClientCmd, ServerCmd};
 use controller::CollisionController;
 use websocket::{OwnedMessage};
+
+const MAP_CONF_DIR: &str = "config-rs/map";
 
 pub struct Game {
     pub arena: Option<Arena>,
@@ -29,9 +31,8 @@ impl Game {
     }
 
     pub fn init(&mut self) {
-        let config = Config::load(GAME_CONF_PATH);
         let mut arena = Arena::new();
-        arena.load_map("config-rs/map.txt");
+        arena.load_map(Path::new(MAP_CONF_DIR));
         self.arena = Some(arena);
     }
 

@@ -1,0 +1,46 @@
+{
+  "spike_templates": [
+    {
+      "tile_point_1": {
+        "x": 8,
+        "y": 1
+      },
+      "tile_point_2": {
+        "x": 20,
+        "y": 1
+      },
+      "normal": {
+        "x": 0,
+        "y": 1
+      }
+    },
+    {
+      "tile_point_1": {
+        "x": 1,
+        "y": 3
+      },
+      "tile_point_2": {
+        "x": 1,
+        "y": 15
+      },
+      "normal": {
+        "x": 1,
+        "y": 0
+      }
+    },
+    {
+      "tile_point_1": {
+        "x": 11,
+        "y": 8
+      },
+      "tile_point_2": {
+        "x": 16,
+        "y": 8
+      },
+      "normal": {
+        "x": 0,
+        "y": -1
+      }
+    }
+  ]
+}

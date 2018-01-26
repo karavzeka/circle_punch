@@ -13,6 +13,7 @@ class Arena
         this.canvas = canvas;
         this.ctx = null;
         this.walls = [];
+        this.spikes = [];
 
         this.camera = new Camera(canvas.width, canvas.height);
         this.camera.setArena(this);
@@ -128,8 +129,7 @@ class Arena
     }
 
     /**
-     * Добавляет стену к canvas'у.
-     * Добавляется без возможности удаления.
+     * Adds a wall to arena
      *
      * @param x
      * @param y
@@ -140,6 +140,23 @@ class Arena
         let wall = new Wall(x, y, size);
         wall.setArena(this);
         this.walls.push(wall);
+    }
+
+    /**
+     * Adds spike to arena
+     *
+     * @param drawBody
+     * @param dangerBody
+     * @param normal
+     * @param vecAlongSpike
+     * @param height
+     * @param needleHalfWidth
+     */
+    addSpike(drawBody, dangerBody, normal, vecAlongSpike, height, needleHalfWidth)
+    {
+        let spike = new Spike(drawBody, dangerBody, normal, vecAlongSpike, height, needleHalfWidth);
+        spike.setArena(this);
+        this.spikes.push(spike);
     }
 
     /**
@@ -170,6 +187,7 @@ class Arena
         this.clearCanvas();
         this.drawWalls();
         this.drawPlayers();
+        this.drawSpikes();
     }
 
     drawPlayers()
@@ -184,6 +202,13 @@ class Arena
     {
         for (let i = 0, len = this.walls.length; i < len; i++) {
             this.walls[i].draw();
+        }
+    }
+
+    drawSpikes()
+    {
+        for (let i = 0, len = this.spikes.length; i < len; i++) {
+            this.spikes[i].draw();
         }
     }
 }
