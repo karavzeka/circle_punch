@@ -1,4 +1,4 @@
-use game::{Player, RESTITUTION, Wall};
+use game::{Player, RESTITUTION, Wall, Spike, MAX_VELOCITY};
 use std::f32;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -153,6 +153,46 @@ impl CollisionController {
             }
             None => {}
         }
+    }
+
+    pub fn detect_player_vs_spike(&mut self, player: &Player, spikes: &Vec<Spike>) {
+        for spike in spikes.iter() {
+            let segment = spike.danger_body.point_2 - spike.danger_body.point_1;
+            let vec_to_point_1 = player.body.pos - spike.danger_body.point_1;
+            let on_normal = vec_to_point_1.dot(spike.normal);
+            if on_normal.abs() > player.body.r {
+                // Player is far from spike
+                continue;
+            }
+
+            let on_line = vec_to_point_1.dot(segment.normalize());
+            let r2 = player.body.r.powi(2);
+            let vec_to_point_2 = player.body.pos - spike.danger_body.point_2;
+
+            let is_withing_segment = 0.0 < on_line && on_line.powi(2) < segment.magnitude2();
+            let is_collision_with_end = vec_to_point_1.magnitude2() <= r2 || vec_to_point_2.magnitude2() <= r2;
+
+            if  is_withing_segment || is_collision_with_end {
+                let mut velocity_to_normal = player.body.velocity.dot(spike.normal);
+                if velocity_to_normal < 0.0 || is_collision_with_end {
+                    let recoil_velocity = (velocity_to_normal * -2.0 + MAX_VELOCITY / 2.0) * spike.normal;
+
+                    // Penetration correction
+                    let penetration = player.body.r - on_normal;
+                    let percent = 0.2; // 20% .. 80%
+                    let slop = 0.01;
+                    let relative_correction = percent * spike.normal * (0.0f32.max(penetration - slop) / player.body.inv_mass);
+
+                    let collision = Collision {
+                        recoil_velocity,
+                        relative_pos_correction: relative_correction
+                    };
+                    self.add_collision(player.id.clone(), collision);
+                }
+            }
+
+        }
+
     }
 
     fn add_collision(&mut self, player_id: String, collision: Collision) {

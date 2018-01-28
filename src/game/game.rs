@@ -86,6 +86,7 @@ impl Game {
                     self.collision_controller.detect_player_vs_player(player_i, player_j);
                 }
                 self.collision_controller.detect_player_vs_wall(player_i, self.arena.as_ref().unwrap().walls.as_ref());
+                self.collision_controller.detect_player_vs_spike(player_i, self.arena.as_ref().unwrap().spikes.as_ref());
                 // Immutable borrow of player_i ends here
             }
 
