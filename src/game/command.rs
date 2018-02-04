@@ -55,6 +55,10 @@ pub struct PlayerCmd {
 
     #[serde(skip_serializing_if = "Position::is_stay")]
     pub position: Position,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub health_max: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub health: Option<f32>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

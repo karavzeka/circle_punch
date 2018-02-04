@@ -48,11 +48,13 @@ impl CollisionController {
 
             let collision_1 = Collision {
                 recoil_velocity: recoil_velocity_1,
-                relative_pos_correction: relative_correction
+                relative_pos_correction: relative_correction,
+                damage: 0.0,
             };
             let collision_2 = Collision {
                 recoil_velocity: recoil_velocity_2,
-                relative_pos_correction: relative_correction * (-1.0)
+                relative_pos_correction: relative_correction * (-1.0),
+                damage: 0.0,
             };
 
             self.add_collision(player_1.id.clone(), collision_1);
@@ -141,7 +143,8 @@ impl CollisionController {
 
             let collision = Collision {
                 recoil_velocity,
-                relative_pos_correction: relative_correction
+                relative_pos_correction: relative_correction,
+                damage: 0.0,
             };
 
             closest_collision = Some(collision);
@@ -185,7 +188,8 @@ impl CollisionController {
 
                     let collision = Collision {
                         recoil_velocity,
-                        relative_pos_correction: relative_correction
+                        relative_pos_correction: relative_correction,
+                        damage: 25.0,
                     };
                     self.add_collision(player.id.clone(), collision);
                 }
@@ -214,10 +218,11 @@ impl CollisionController {
     }
 }
 
-/// Player - player collision
+/// Player - anything collision
 struct Collision {
     recoil_velocity: Vector2<f32>,
     relative_pos_correction: Vector2<f32>,
+    damage: f32,
 }
 
 impl Collision {
@@ -225,5 +230,8 @@ impl Collision {
     pub fn apply(&self, player: &mut Player) {
         player.body.velocity += self.recoil_velocity;
         player.body.pos += self.relative_pos_correction * player.body.inv_mass;
+        if self.damage > 0.0 {
+            player.lost_health(self.damage);
+        }
     }
 }

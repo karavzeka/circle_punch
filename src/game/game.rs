@@ -45,6 +45,25 @@ impl Game {
         self.send_map(&mut player);
         self.players.insert(player_id.clone(), player);
 
+        // To show health of all players for new player
+        for player in self.players.values_mut() {
+            player.is_health_changed = true;
+        }
+    }
+
+    /// Respawn player
+    fn respawn_player(&mut self, player_id: &str) {
+        let (spawn_x, spawn_y) = self.arena.as_ref().unwrap().get_spawn_pos(&self.players);
+
+        let mut player = self.players.get_mut(player_id).unwrap();
+        player.set_position(spawn_x, spawn_y);
+        player.body.velocity.x = 0.0;
+        player.body.velocity.y = 0.0;
+        player.body.acceleration.x = 0.0;
+        player.body.acceleration.y = 0.0;
+        player.health = 100.0;
+        player.is_dead = false;
+        player.is_health_changed = true;
     }
 
     /// Remove palayer
@@ -72,10 +91,17 @@ impl Game {
 
         let player_ids: Vec<String> = self.players.keys().map(|key| key.clone()).collect();
         for (i, player_id_i) in player_ids.iter().enumerate() {
+            let mut is_dead = false;
             // Updating player state
             {
                 let player_i = self.players.get_mut(player_id_i).unwrap();
+                if player_i.is_dead {
+                    is_dead = player_i.is_dead;
+                }
                 player_i.update(dt);
+            }
+            if is_dead {
+                self.respawn_player(player_id_i);
             }
             // Finding player-player collisions
             {

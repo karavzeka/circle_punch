@@ -8,6 +8,8 @@ use cgmath::{Point2, Vector2, Zero};
 
 pub const DEFAULT_RADIUS: f32 = 16.0;
 pub const DEFAULT_MASS: f32 = 100.0;
+pub const DEFAULT_HEALTH: f32 = 100.0;
+pub const HEALING: f32 = 0.005;
 pub const MOVE_FORCE: f32 = 30000.0;
 pub const FRICTION_FORCE: f32 = 15000.0;
 pub const MAX_VELOCITY: f32 = 100.0;
@@ -18,6 +20,12 @@ pub struct Player {
     pub sender: websocket::sender::Writer<TcpStream>,
 
     pub body: PlayerBody,
+    pub health_max: f32,
+    pub health: f32,
+    pub is_health_changed: bool,
+    pub is_dead: bool,
+
+    healing_counter: u8,
 
     // Actions
     pub move_to: Vector2<i16>
@@ -36,6 +44,11 @@ impl Player {
                 mass: DEFAULT_MASS,
                 inv_mass: 1.0 / DEFAULT_MASS,
             },
+            health_max: DEFAULT_HEALTH,
+            health: DEFAULT_HEALTH,
+            is_health_changed: true,
+            is_dead: false,
+            healing_counter: 0,
 
             // Actions
             move_to: Vector2::zero(),
@@ -67,6 +80,17 @@ impl Player {
         self.move_to.y = 0;
     }
 
+    /// Take away some health
+    pub fn lost_health(&mut self, value: f32) {
+        self.is_health_changed = true;
+
+        self.health -= value;
+        if self.health <= 0.0 {
+            self.is_dead = true;
+            self.health = 0.0;
+        }
+    }
+
     /// Update player state
     pub fn update(&mut self, dt: f32) {
         self.update_velocity(dt);
@@ -74,8 +98,18 @@ impl Player {
         self.body.pos.y += self.body.velocity.y * dt;
 
         self.reset_move_to();
+
+        if self.health < self.health_max {
+            self.health += HEALING;
+            self.healing_counter += 1;
+            if self.healing_counter >= 100 {
+                self.is_health_changed = true;
+                self.healing_counter = 0;
+            }
+        }
     }
 
+    /// Aggregates some factors and calculates current velocity
     fn update_velocity(&mut self, dt: f32) {
         let mut total_force = Vector2::zero();
 
@@ -121,15 +155,26 @@ impl Player {
         }
     }
 
-    pub fn generate_cmd(&self) -> PlayerCmd {
-        PlayerCmd {
+    /// Generates the command to send it to client
+    pub fn generate_cmd(&mut self) -> PlayerCmd {
+        let player = PlayerCmd {
             player_id: self.id.clone(),
             it_is_you: false,
             position: Position {
                 x: self.body.pos.x,
                 y: self.body.pos.y,
-            }
-        }
+            },
+            health_max: match self.is_health_changed {
+                true => Some(self.health_max),
+                false => None
+            },
+            health: match self.is_health_changed {
+                true => Some(self.health),
+                false => None
+            },
+        };
+        self.is_health_changed = false;
+        player
     }
 }
 

@@ -174,6 +174,7 @@ class Arena
     update()
     {
         this.camera.observeObject(this.mainPlayer.posX, this.mainPlayer.posY);
+        this.mainPlayer.update();
         for (let player_id in this.players) {
             this.players[player_id].update();
         }

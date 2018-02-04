@@ -12,6 +12,6 @@ cargo run
 #### Media
 Current state
 
-[![video](https://img.youtube.com/vi/pmX3gIrjSVI/0.jpg)](https://www.youtube.com/watch?v=pmX3gIrjSVI)
+[![video](https://img.youtube.com/vi/S7-AHPzkgW0/0.jpg)](https://www.youtube.com/watch?v=S7-AHPzkgW0)
 
 [History](https://www.youtube.com/playlist?list=PLcC7K4eN-5lha5W0ifDuv9xPcjvG7Wscl)

@@ -18,7 +18,13 @@ class Player
         this.posY = 0;
         this.color = 'rgba(0, 0, 200, 0.7)';
 
-        this.moveSpeed = 1.2;
+        this.health = 0;
+        this.health_max = 0;
+        this.healthRelative = 0;
+        this.is_health_changed = false;
+        this.get_damage = false;
+        this.healthRadius = 12;
+        this.healthColor = 'rgba(0, 255, 0, 1)';
 
         this.bound = new Bound();
     }
@@ -62,25 +68,40 @@ class Player
     }
 
     /**
+     * Sets current health
+     *
+     * @param health
+     */
+    setHealth(health)
+    {
+        if (health < this.health) {
+            this.get_damage = true;
+        }
+        this.health = health;
+    }
+
+    /**
      * Обновление состояния игрока
      */
     update()
     {
-        // if (this.isMain) {
-        //     if (this.isMoveRight()) {
-        //         this.posX += this.moveSpeed;
-        //     }
-        //     if (this.isMoveLeft()) {
-        //         this.posX -= this.moveSpeed;
-        //     }
-        //     if (this.isMoveUp()) {
-        //         this.posY -= this.moveSpeed;
-        //     }
-        //     if (this.isMoveDown()) {
-        //         this.posY += this.moveSpeed;
-        //     }
-        //     // console.log(this.posX);
-        // }
+        if (this.get_damage) {
+            this.color = 'rgba(200, 0, 0, 0.7)';
+            this.get_damage = false;
+        } else {
+            this.color = 'rgba(0, 0, 200, 0.7)';
+        }
+
+        this.healthRelative = this.health / this.health_max;
+        let healthColorR, healthColorG;
+        if (this.healthRelative > 0.5) {
+            healthColorR = Math.ceil(255 - (255 * this.healthRelative * 2 - 255));
+            healthColorG = 255;
+        } else {
+            healthColorR = 255;
+            healthColorG = Math.ceil(255 * this.healthRelative * 2);
+        }
+        this.healthColor = 'rgba(' + healthColorR + ', ' + healthColorG + ', 0, 1)';
     }
 
     /**
@@ -93,11 +114,22 @@ class Player
         }
 
         let ctx = this.arena.getContext2D();
+        let x = this.arena.camera.correctDrawX(this.posX);
+        let y = this.arena.camera.correctDrawY(this.posY);
         ctx.beginPath();
-        ctx.arc(this.arena.camera.correctDrawX(this.posX), this.arena.camera.correctDrawY(this.posY), this.radius, 0, Math.PI * 2, true);
+        ctx.arc(x, y, this.radius, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.fillStyle = this.color;
         ctx.fill();
+
+        // Drawing health
+        ctx.beginPath();
+        let startAngle = Math.PI * 1.5;
+        let endAngle = startAngle - 2 * Math.PI * this.healthRelative;
+        ctx.arc(x, y, this.healthRadius, startAngle, endAngle, true);
+        ctx.strokeStyle = this.healthColor;
+        ctx.lineWidth = 3;
+        ctx.stroke();
     }
 
     updateCmd()

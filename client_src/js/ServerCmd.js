@@ -21,7 +21,6 @@ class ServerCmd
                 this.processPlayersCmd(cmd);
                 break;
             case CMD_TYPE_MAP:
-                console.log(cmd);
                 this.processMapCmd(cmd);
                 break;
         }
@@ -49,7 +48,13 @@ class ServerCmd
 
             player.setPosition(playerCmd.position.x, playerCmd.position.y);
 
-            // console.log(player);
+            if (playerCmd.health_max !== undefined) {
+                player.health_max = playerCmd.health_max;
+            }
+
+            if (playerCmd.health !== undefined) {
+                player.setHealth(playerCmd.health);
+            }
         }
 
         // Удаление отключенных игроков

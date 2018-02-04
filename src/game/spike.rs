@@ -60,8 +60,8 @@ impl SpikeFabric {
             panic!("Incorrect spike normal");
         }
 
-        let danger_point_1 = draw_point_1 + vec_along_spike * NEEDLE_HALF_WIDTH + normal * SPIKE_HEIGHT;
-        let danger_point_2 = draw_point_2 - vec_along_spike * NEEDLE_HALF_WIDTH + normal * SPIKE_HEIGHT;
+        let danger_point_1 = draw_point_1 + vec_along_spike * NEEDLE_HALF_WIDTH + normal * SPIKE_HEIGHT * 0.9;
+        let danger_point_2 = draw_point_2 - vec_along_spike * NEEDLE_HALF_WIDTH + normal * SPIKE_HEIGHT * 0.9;
 
         Spike {
             draw_body: SpikeBody {
