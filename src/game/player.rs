@@ -5,11 +5,14 @@ use super::command::{PlayerCmd, Position};
 use std::net::TcpStream;
 use std::cmp::Ordering;
 use cgmath::{Point2, Vector2, Zero};
+use chrono::prelude::{DateTime, Utc};
+use chrono::Duration;
 
 pub const DEFAULT_RADIUS: f32 = 16.0;
 pub const DEFAULT_MASS: f32 = 100.0;
 pub const DEFAULT_HEALTH: f32 = 100.0;
 pub const HEALING: f32 = 0.005;
+pub const ATTACK_DELAY: i64 = 2000;
 pub const MOVE_FORCE: f32 = 30000.0;
 pub const FRICTION_FORCE: f32 = 15000.0;
 pub const MAX_VELOCITY: f32 = 100.0;
@@ -20,6 +23,7 @@ pub struct Player {
     pub sender: websocket::sender::Writer<TcpStream>,
 
     pub body: PlayerBody,
+
     pub health_max: f32,
     pub health: f32,
     pub is_health_changed: bool,
@@ -27,8 +31,12 @@ pub struct Player {
 
     healing_counter: u8,
 
+    attack_delay: i64,
+    last_attack: DateTime<Utc>,
+
     // Actions
-    pub move_to: Vector2<i16>
+    pub move_to: Vector2<i16>,
+    pub attack: bool,
 }
 
 impl Player {
@@ -50,8 +58,12 @@ impl Player {
             is_dead: false,
             healing_counter: 0,
 
+            attack_delay: ATTACK_DELAY,
+            last_attack: Utc::now().checked_sub_signed(Duration::seconds(ATTACK_DELAY)).unwrap(),
+
             // Actions
             move_to: Vector2::zero(),
+            attack: false,
         }
     }
 
@@ -80,6 +92,14 @@ impl Player {
         self.move_to.y = 0;
     }
 
+    pub fn attack(&mut self) {
+        let now = Utc::now();
+        if now.signed_duration_since(self.last_attack).ge(&Duration::milliseconds(self.attack_delay)) {
+            self.attack = true;
+            self.last_attack = now;
+        }
+    }
+
     /// Take away some health
     pub fn lost_health(&mut self, value: f32) {
         self.is_health_changed = true;
@@ -93,12 +113,14 @@ impl Player {
 
     /// Update player state
     pub fn update(&mut self, dt: f32) {
+        // Update moving
         self.update_velocity(dt);
         self.body.pos.x += self.body.velocity.x * dt;
         self.body.pos.y += self.body.velocity.y * dt;
 
         self.reset_move_to();
 
+        // Update health
         if self.health < self.health_max {
             self.health += HEALING;
             self.healing_counter += 1;
@@ -106,6 +128,11 @@ impl Player {
                 self.is_health_changed = true;
                 self.healing_counter = 0;
             }
+        }
+
+        // Update attacking
+        if self.attack {
+            self.attack = false;
         }
     }
 

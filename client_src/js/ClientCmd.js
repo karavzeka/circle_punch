@@ -16,7 +16,7 @@ class ClientCmd
             x: 0,
             y: 0
         };
-        this.shot = false;
+        this.attack = false;
     }
 
     /**
@@ -44,8 +44,8 @@ class ClientCmd
             }
         }
 
-        if (this.shot === false) {
-            delete this.shot;
+        if (this.attack === false) {
+            delete this.attack;
         }
     }
 
@@ -57,6 +57,6 @@ class ClientCmd
      */
     isEmpty()
     {
-        return this.move_vector === undefined && this.shot === undefined;
+        return this.move_vector === undefined && this.attack === false;
     }
 }

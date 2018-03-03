@@ -14,6 +14,7 @@ class Arena
         this.ctx = null;
         this.walls = [];
         this.spikes = [];
+        this.waves = {};
 
         this.camera = new Camera(canvas.width, canvas.height);
         this.camera.setArena(this);
@@ -160,6 +161,43 @@ class Arena
     }
 
     /**
+     * Checks if such wave exists
+     *
+     * @param waveId
+     * @returns {boolean}
+     */
+    issetWave(waveId) {
+        return this.waves[waveId] !== undefined;
+    }
+
+    /**
+     * Add new wave
+     *
+     * @param waveId
+     * @param posX
+     * @param posY
+     * @param radius
+     */
+    addWave(waveId, posX, posY, radius) {
+        let wave = new Wave(posX, posY, radius);
+        wave.setArena(this);
+        this.waves[waveId] = wave;
+    }
+
+    getWave(waveId) {
+        return this.waves[waveId];
+    }
+
+    /**
+     * Remove wave
+     *
+     * @param waveId
+     */
+    removeWave(waveId) {
+        delete this.waves[waveId];
+    }
+
+    /**
      * Очищает холст
      */
     clearCanvas()
@@ -188,14 +226,22 @@ class Arena
         this.clearCanvas();
         this.drawWalls();
         this.drawPlayers();
+        this.drawWaves();
         this.drawSpikes();
     }
 
     drawPlayers()
     {
         this.mainPlayer.draw();
-        for (let player_id in this.players) {
-            this.players[player_id].draw();
+        for (let playerId in this.players) {
+            this.players[playerId].draw();
+        }
+    }
+
+    drawWaves()
+    {
+        for (let waveId in this.waves) {
+            this.waves[waveId].draw();
         }
     }
 

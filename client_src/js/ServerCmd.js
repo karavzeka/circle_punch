@@ -63,6 +63,22 @@ class ServerCmd
                 this.arena.removePlayer(playerId);
             }
         }
+
+        // Обработка волн
+        if (cmd.waves !== undefined) {
+            for (let wave of cmd.waves) {
+                if (this.arena.issetWave(wave.id)) {
+                    if (wave.is_dead) {
+                        this.arena.removeWave(wave.id);
+                    } else {
+                        let waveObj = this.arena.getWave(wave.id);
+                        waveObj.radius = wave.r;
+                    }
+                } else {
+                    this.arena.addWave(wave.id, wave.position.x, wave.position.y, wave.r);
+                }
+            }
+        }
     }
 
     processMapCmd(cmd)

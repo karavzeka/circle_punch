@@ -14,7 +14,7 @@ pub struct ClientCmd {
     #[serde(default)]
     pub player_id: String,
     #[serde(default)]
-    pub shot: bool,
+    pub attack: bool,
     #[serde(default)]
     pub move_vector: MoveVector,
 }
@@ -25,6 +25,8 @@ pub struct ServerCmd<'a> {
     pub cmd_type: &'a str,
     pub time: u64,
     pub players: Vec<PlayerCmd>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub waves: Vec<WaveCmd>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub disconnected_players: Vec<String>,
 }
@@ -37,6 +39,7 @@ impl<'a> ServerCmd<'a> {
             cmd_type: ServerCmd::get_cmd_type(),
             time: ts,
             players: Vec::new(),
+            waves: Vec::new(),
             disconnected_players: Vec::new(),
         }
     }
@@ -101,6 +104,25 @@ impl<'a> MapCmd<'a> {
 impl<'a> CmdType<'a> for MapCmd<'a> {
     fn get_cmd_type() -> &'a str {
         CMD_TYPE_MAP
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct WaveCmd {
+    id: i64,
+    position: Position,
+    r: f32,
+    is_dead: bool
+}
+
+impl WaveCmd {
+    pub fn new(id: i64, x: f32, y: f32, r: f32, is_dead: bool) -> WaveCmd {
+        WaveCmd {
+            id,
+            position: Position {x, y},
+            r,
+            is_dead
+        }
     }
 }
 

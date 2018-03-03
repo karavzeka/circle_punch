@@ -147,7 +147,7 @@ class Player
             this.cmd.move_vector.y++;
         }
         if (isKeyPressed(GAME_KEYS.VK_SPACE)) {
-            this.cmd.shot = true;
+            this.cmd.attack = true;
         }
     }
 

@@ -1,7 +1,7 @@
 extern crate websocket;
 extern crate serde_json;
 
-use super::{Arena, Player};
+use super::{Arena, Player, Wave};
 
 use config::Config;
 use std::net::TcpStream;
@@ -18,6 +18,7 @@ pub struct Game {
     pub players: HashMap<String, Player>,
     pub disconnected_players: Vec<String>,
     pub collision_controller: CollisionController,
+    pub waves: Vec<Wave>,
 }
 
 impl Game {
@@ -27,6 +28,7 @@ impl Game {
             players: HashMap::new(),
             disconnected_players: Vec::new(),
             collision_controller: CollisionController::new(),
+            waves: Vec::new(),
         }
     }
 
@@ -82,6 +84,9 @@ impl Game {
         };
 
         player.set_move_to(cmd.move_vector.x, cmd.move_vector.y);
+        if cmd.attack {
+            player.attack();
+        }
     }
 
     /// Send game state to all players
@@ -98,6 +103,11 @@ impl Game {
                 if player_i.is_dead {
                     is_dead = player_i.is_dead;
                 }
+
+                if player_i.attack {
+                    self.waves.push(Wave::new(&player_i));
+                }
+
                 player_i.update(dt);
             }
             if is_dead {
@@ -113,6 +123,7 @@ impl Game {
                 }
                 self.collision_controller.detect_player_vs_wall(player_i, self.arena.as_ref().unwrap().walls.as_ref());
                 self.collision_controller.detect_player_vs_spike(player_i, self.arena.as_ref().unwrap().spikes.as_ref());
+                self.collision_controller.detect_player_vs_wave(player_i, self.waves.as_mut());
                 // Immutable borrow of player_i ends here
             }
 
@@ -123,6 +134,20 @@ impl Game {
             // Generation player command
             let player_cmd = player_i.generate_cmd();
             cmd.players.push(player_cmd);
+        }
+
+        // Waves update
+        let mut dead_waves = Vec::new();
+        for (i, wave) in self.waves.iter_mut().enumerate() {
+            wave.update();
+            if wave.is_dead {
+                dead_waves.push(i);
+            }
+            cmd.waves.push(wave.generate_cmd());
+        }
+        // Remove dead waves
+        for wave_index in dead_waves.iter() {
+            self.waves.remove(*wave_index);
         }
 
         // Individual modification and sending command

@@ -1,4 +1,4 @@
-use game::{Player, RESTITUTION, Wall, Spike, MAX_VELOCITY};
+use game::{Player, RESTITUTION, Wall, Spike, Wave, MAX_VELOCITY};
 use std::f32;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -194,9 +194,33 @@ impl CollisionController {
                     self.add_collision(player.id.clone(), collision);
                 }
             }
-
         }
+    }
 
+    pub fn detect_player_vs_wave(&mut self, player: &Player, waves: &mut Vec<Wave>) {
+        for wave in waves.iter_mut() {
+            if wave.owner_id == player.id || wave.collided_with.contains(&player.id) {
+                continue;
+            }
+
+            let distance2 = wave.pos.distance2(player.body.pos);
+            let total_radius = wave.r + player.body.r;
+
+            if distance2 <= total_radius.powi(2) {
+                // Collision occurred
+//                wave.collided_with.push(player.id.clone());
+
+                let normal = (player.body.pos - wave.pos).normalize();
+                let recoil_velocity = MAX_VELOCITY / 6.0 * normal;
+
+                let collision = Collision {
+                    recoil_velocity,
+                    relative_pos_correction: Vector2::new(0.0, 0.0),
+                    damage: 1.0,
+                };
+                self.add_collision(player.id.clone(), collision);
+            }
+        }
     }
 
     fn add_collision(&mut self, player_id: String, collision: Collision) {
