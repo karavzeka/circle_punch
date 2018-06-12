@@ -132,22 +132,44 @@ class Player
         ctx.stroke();
     }
 
-    updateCmd()
+    updateCmd(keysQueue)
     {
-        if (isKeyPressed(GAME_KEYS.VK_D) || isKeyPressed(GAME_KEYS.VK_RIGHT)) {
-            this.cmd.move_vector.x++;
-        }
-        if (isKeyPressed(GAME_KEYS.VK_A) || isKeyPressed(GAME_KEYS.VK_LEFT)) {
-            this.cmd.move_vector.x--;
-        }
-        if (isKeyPressed(GAME_KEYS.VK_W) || isKeyPressed(GAME_KEYS.VK_UP)) {
-            this.cmd.move_vector.y--;
-        }
-        if (isKeyPressed(GAME_KEYS.VK_S) || isKeyPressed(GAME_KEYS.VK_DOWN)) {
-            this.cmd.move_vector.y++;
+        let  len = keysQueue.length;
+        for (let i = 0; i < len; i++) {
+            let keyAction = keysQueue.pop();
+            if (keyAction.code === GAME_KEYS.VK_D || keyAction.code === GAME_KEYS.VK_RIGHT) {
+                if (keyAction.action === KEY_DOWN) {
+                    this.cmd.move_vector.x++;
+                } else {
+                    this.cmd.move_vector.x--;
+                }
+            }
+            if (keyAction.code === GAME_KEYS.VK_A || keyAction.code === GAME_KEYS.VK_LEFT) {
+                if (keyAction.action === KEY_DOWN) {
+                    this.cmd.move_vector.x--;
+                } else {
+                    this.cmd.move_vector.x++;
+                }
+            }
+            if (keyAction.code === GAME_KEYS.VK_W || keyAction.code === GAME_KEYS.VK_UP) {
+                if (keyAction.action === KEY_DOWN) {
+                    this.cmd.move_vector.y--;
+                } else {
+                    this.cmd.move_vector.y++;
+                }
+            }
+            if (keyAction.code === GAME_KEYS.VK_S || keyAction.code === GAME_KEYS.VK_DOWN) {
+                if (keyAction.action === KEY_DOWN) {
+                    this.cmd.move_vector.y++;
+                } else {
+                    this.cmd.move_vector.y--;
+                }
+            }
+            this.cmd.readyForSend = true;
         }
         if (isKeyPressed(GAME_KEYS.VK_SPACE)) {
             this.cmd.attack = true;
+            this.cmd.readyForSend = true;
         }
     }
 

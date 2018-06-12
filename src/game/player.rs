@@ -86,12 +86,6 @@ impl Player {
         }
     }
 
-    /// Reset move vector
-    fn reset_move_to(&mut self) {
-        self.move_to.x = 0;
-        self.move_to.y = 0;
-    }
-
     pub fn attack(&mut self) {
         let now = Utc::now();
         if now.signed_duration_since(self.last_attack).ge(&Duration::milliseconds(self.attack_delay)) {
@@ -117,8 +111,6 @@ impl Player {
         self.update_velocity(dt);
         self.body.pos.x += self.body.velocity.x * dt;
         self.body.pos.y += self.body.velocity.y * dt;
-
-        self.reset_move_to();
 
         // Update health
         if self.health < self.health_max {

@@ -4,7 +4,12 @@ class ClientCmd
 {
     constructor()
     {
-        this.toDefault();
+        this.move_vector = {
+            x: 0,
+            y: 0
+        };
+        this.attack = false;
+        this.readyForSend = false;
     }
 
     /**
@@ -12,41 +17,8 @@ class ClientCmd
      */
     toDefault()
     {
-        this.move_vector = {
-            x: 0,
-            y: 0
-        };
         this.attack = false;
-    }
-
-    /**
-     * Prepare command to send
-     */
-    prepare()
-    {
-        if (this.move_vector.x === 0 && this.move_vector.y === 0) {
-            delete this.move_vector;
-        } else {
-            if (this.move_vector.x === 0) {
-                delete this.move_vector.x;
-            } else if (this.move_vector.x > 1) {
-                this.move_vector.x = 1;
-            } else if (this.move_vector.x < -1) {
-                this.move_vector.x = -1;
-            }
-
-            if (this.move_vector.y === 0) {
-                delete this.move_vector.y;
-            } else if (this.move_vector.y > 1) {
-                this.move_vector.y = 1;
-            } else if (this.move_vector.y < -1) {
-                this.move_vector.y = -1;
-            }
-        }
-
-        if (this.attack === false) {
-            delete this.attack;
-        }
+        this.readyForSend = false;
     }
 
     /**
@@ -55,8 +27,8 @@ class ClientCmd
      *
      * @returns {boolean}
      */
-    isEmpty()
+    isReadyForSend()
     {
-        return this.move_vector === undefined && this.attack === false;
+        return this.readyForSend;
     }
 }

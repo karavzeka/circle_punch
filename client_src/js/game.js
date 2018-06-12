@@ -29,8 +29,12 @@ const GAME_KEYS = {
     32: true,
 };
 
+const KEY_DOWN = 'keydown';
+const KEY_UP = 'keyup';
+
 let global = {
-    stopGame: false
+    stopGame: false,
+    keysQueue: []
 };
 
 const FPS = 60;
@@ -47,22 +51,25 @@ function isKeyPressed(code)
 function initEvents(arena)
 {
     // Button events
-    document.addEventListener("keydown", function (event) {
+    document.addEventListener(KEY_DOWN, function (event) {
         if (!isKeyPressed(event.keyCode) && document.activeElement.tagName !== 'INPUT' && GAME_KEYS[event.keyCode] !== undefined) {
             input.keys[event.keyCode] = true;
 
-            let player = arena.getMainPlayer();
-            if (player !== null) {
+            global.keysQueue.push(new KeyAction(event.keyCode, KEY_DOWN));
 
-                player.updateCmd();
-            }
+            // let player = arena.getMainPlayer();
+            // if (player !== null) {
+
+                // player.updateCmd();
+            // }
 
             event.preventDefault();
         }
     });
 
-    document.addEventListener("keyup", function (event) {
+    document.addEventListener(KEY_UP, function (event) {
         input.keys[event.keyCode] = false;
+        global.keysQueue.push(new KeyAction(event.keyCode, KEY_UP));
         event.preventDefault();
     });
 
@@ -107,11 +114,10 @@ function processFrame(arena)
         arena.draw();
 
         let player = arena.getMainPlayer();
-        player.updateCmd();
+        player.updateCmd(global.keysQueue);
 
         let playerCmd = player.getCmd();
-        playerCmd.prepare();
-        if (!playerCmd.isEmpty()) {
+        if (playerCmd.isReadyForSend()) {
             // console.log(JSON.stringify(playerCmd));
             WsController.getInstance().send(JSON.stringify(playerCmd));
         }
