@@ -1,11 +1,8 @@
 use chrono::prelude::Utc;
-use cgmath::{Point2};
 
 const CMD_TYPE_PLAYERS: &str = "players";
 const CMD_TYPE_MAP: &str = "map";
-const CMD_TYPE_GUEST_ID: &str = "guest_id";
 const CMD_TYPE_BAD_REG: &str = "bad_reg";
-//const CMD_TYPE_GOOD_REG: &str = "good_reg";
 
 trait CmdType<'a> {
     fn get_cmd_type() -> &'a str;
@@ -150,27 +147,6 @@ impl Position {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct GuestIdCmd<'a> {
-    pub cmd_type: &'a str,
-    pub guest_id: String
-}
-
-impl<'a> CmdType<'a> for GuestIdCmd<'a> {
-    fn get_cmd_type() -> &'a str {
-        CMD_TYPE_GUEST_ID
-    }
-}
-
-impl<'a> GuestIdCmd<'a> {
-    pub fn new(guest_id: String) -> GuestIdCmd<'a> {
-        GuestIdCmd {
-            cmd_type: GuestIdCmd::get_cmd_type(),
-            guest_id
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
 pub struct BadRegistrationCmd<'a> {
     pub cmd_type: &'a str,
     pub message: String
@@ -232,8 +208,4 @@ pub struct ClientCmd {
     #[serde(default)]
     pub player_id: String,
     pub cmd: IncomingCmdType,
-}
-
-enum OutgoingCmd {
-
 }

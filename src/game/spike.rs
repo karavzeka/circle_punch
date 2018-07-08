@@ -2,7 +2,7 @@ use super::EDGE_SIZE;
 use super::command::{SpikeCmd, Position, Line};
 
 use json_struct::SpikeTemplate;
-use cgmath::{Point2, Vector2, Zero, InnerSpace};
+use cgmath::{Point2, Vector2, InnerSpace};
 
 pub const SPIKE_HEIGHT:f32 = 16.0;
 pub const NEEDLE_HALF_WIDTH:f32 = 8.0;

@@ -2,9 +2,7 @@ extern crate websocket;
 extern crate serde_json;
 
 use super::{Arena, Player, Wave};
-use super::command::GuestIdCmd;
 
-use config::Config;
 use std::net::TcpStream;
 use std::collections::HashMap;
 use std::path::Path;
@@ -52,7 +50,7 @@ impl Game {
     fn respawn_player(&mut self, player_id: &str) {
         let (spawn_x, spawn_y) = self.arena.as_ref().unwrap().get_spawn_pos(&self.players);
 
-        let mut player = self.players.get_mut(player_id).unwrap();
+        let player = self.players.get_mut(player_id).unwrap();
         player.set_position(spawn_x, spawn_y);
         player.body.velocity.x = 0.0;
         player.body.velocity.y = 0.0;

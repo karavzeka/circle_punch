@@ -1,7 +1,7 @@
 use super::Player;
-use super::command::{WaveCmd, Position};
+use super::command::{WaveCmd};
 
-use cgmath::{Point2, Vector2, Zero};
+use cgmath::{Point2};
 use chrono::prelude::Utc;
 
 const MAX_RADIUS: f32 = 75.0;

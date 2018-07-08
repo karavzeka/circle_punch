@@ -1,7 +1,6 @@
 use super::Player;
-use super::player::DEFAULT_RADIUS as PLAYER_RADIUS;
 use super::{Wall, Floor, EDGE_SIZE};
-use super::command::{MapCmd, WallCmd, SpikeCmd};
+use super::command::{MapCmd, WallCmd};
 use super::{SpikeFabric, Spike};
 
 use json_struct::MapScheme;

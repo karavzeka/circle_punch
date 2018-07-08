@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate jconfig;
 #[macro_use]
 extern crate serde_derive;
@@ -11,7 +10,6 @@ extern crate rand;
 extern crate cgmath;
 
 mod game;
-mod config;
 mod controller;
 mod json_struct;
 
@@ -23,7 +21,7 @@ use websocket::OwnedMessage;
 use websocket::sync::Server;
 
 use game::{Game};
-use game::command::{ClientCmd, IncomingCmdType};
+use game::command::{ClientCmd};
 
 const FPS: u64 = 60u64;
 const TICK_MS: u64 = (1000u64 / FPS);
@@ -85,8 +83,6 @@ fn main() {
 
                 match message {
                     OwnedMessage::Text(txt) => {
-                        //TODO возможно надо все команды запихнуть в enum (https://serde.rs/enum-representations.html)
-                        let mut cmd_in: IncomingCmdType;
                         let client_cmd: ClientCmd = match serde_json::from_str(&txt) {
                             Ok(cmd_in) => {
 //                                println!("{:?}", cmd_in);
