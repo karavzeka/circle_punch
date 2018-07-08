@@ -63,6 +63,8 @@ class WsController
                 this.connection.addEventListener('close', this.onCloseCallback);
             }
         }
+
+        return true;
     }
 
     /**

@@ -1,12 +1,15 @@
 extern crate websocket;
+extern crate serde_json;
 
-use super::command::{PlayerCmd, Position};
+use super::command::{PlayerCmd, Position, BadRegistrationCmd};
 
 use std::net::TcpStream;
 use std::cmp::Ordering;
 use cgmath::{Point2, Vector2, Zero};
 use chrono::prelude::{DateTime, Utc};
 use chrono::Duration;
+
+use websocket::{OwnedMessage};
 
 pub const DEFAULT_RADIUS: f32 = 16.0;
 pub const DEFAULT_MASS: f32 = 100.0;
@@ -20,6 +23,7 @@ pub const RESTITUTION: f32 = 0.8;
 
 pub struct Player {
     pub id: String,
+    pub nickname: String,
     pub sender: websocket::sender::Writer<TcpStream>,
 
     pub body: PlayerBody,
@@ -43,6 +47,7 @@ impl Player {
     pub fn new(id: String, sender: websocket::sender::Writer<TcpStream>) -> Player {
         Player {
             id,
+            nickname: "".to_owned(),
             sender,
             body: PlayerBody {
                 pos: Point2::new(0.0, 0.0),
@@ -178,6 +183,7 @@ impl Player {
     pub fn generate_cmd(&mut self) -> PlayerCmd {
         let player = PlayerCmd {
             player_id: self.id.clone(),
+            nickname: self.nickname.clone(),
             it_is_you: false,
             position: Position {
                 x: self.body.pos.x,
@@ -194,6 +200,12 @@ impl Player {
         };
         self.is_health_changed = false;
         player
+    }
+
+    pub fn bad_registration_answer(&mut self) {
+        let cmd = BadRegistrationCmd::new("User with that nickname already exists".to_owned());
+        let json = serde_json::to_string(&cmd).unwrap();
+        self.sender.send_message(&OwnedMessage::Text(json)).unwrap();
     }
 }
 

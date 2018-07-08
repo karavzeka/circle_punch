@@ -211,8 +211,10 @@ class Arena
      */
     update()
     {
-        this.camera.observeObject(this.mainPlayer.posX, this.mainPlayer.posY);
-        this.mainPlayer.update();
+        if (this.issetMainPlayer()) {
+            this.camera.observeObject(this.mainPlayer.posX, this.mainPlayer.posY);
+            this.mainPlayer.update();
+        }
         for (let player_id in this.players) {
             this.players[player_id].update();
         }
@@ -232,7 +234,9 @@ class Arena
 
     drawPlayers()
     {
-        this.mainPlayer.draw();
+        if (this.issetMainPlayer()) {
+            this.mainPlayer.draw();
+        }
         for (let playerId in this.players) {
             this.players[playerId].draw();
         }

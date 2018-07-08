@@ -3,20 +3,12 @@ use cgmath::{Point2};
 
 const CMD_TYPE_PLAYERS: &str = "players";
 const CMD_TYPE_MAP: &str = "map";
+const CMD_TYPE_GUEST_ID: &str = "guest_id";
+const CMD_TYPE_BAD_REG: &str = "bad_reg";
+//const CMD_TYPE_GOOD_REG: &str = "good_reg";
 
 trait CmdType<'a> {
     fn get_cmd_type() -> &'a str;
-}
-
-/// Команда игрока для сервера
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ClientCmd {
-    #[serde(default)]
-    pub player_id: String,
-    #[serde(default)]
-    pub attack: bool,
-    #[serde(default)]
-    pub move_vector: MoveVector,
 }
 
 /// Команда сервера для игрока
@@ -54,6 +46,7 @@ impl<'a> CmdType<'a> for ServerCmd<'a> {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct PlayerCmd {
     pub player_id: String,
+    pub nickname: String,
     pub it_is_you: bool,
 
     #[serde(skip_serializing_if = "Position::is_stay")]
@@ -68,16 +61,6 @@ pub struct PlayerCmd {
 pub struct Position {
     pub x: f32,
     pub y: f32,
-}
-
-/// Одна сетевая команда может передать 0, 1 или -1 по каждой из осей.
-/// При этом если за такт пришло от игрока 2 команды (сетевые задержки), то они суммируются.
-#[derive(Serialize, Deserialize, Default, Clone, Debug)]
-pub struct MoveVector {
-    #[serde(default)]
-    pub x: i16,
-    #[serde(default)]
-    pub y: i16,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -164,4 +147,93 @@ impl Position {
             _ => false
         }
     }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GuestIdCmd<'a> {
+    pub cmd_type: &'a str,
+    pub guest_id: String
+}
+
+impl<'a> CmdType<'a> for GuestIdCmd<'a> {
+    fn get_cmd_type() -> &'a str {
+        CMD_TYPE_GUEST_ID
+    }
+}
+
+impl<'a> GuestIdCmd<'a> {
+    pub fn new(guest_id: String) -> GuestIdCmd<'a> {
+        GuestIdCmd {
+            cmd_type: GuestIdCmd::get_cmd_type(),
+            guest_id
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct BadRegistrationCmd<'a> {
+    pub cmd_type: &'a str,
+    pub message: String
+}
+
+impl<'a> CmdType<'a> for BadRegistrationCmd<'a> {
+    fn get_cmd_type() -> &'a str {
+        CMD_TYPE_BAD_REG
+    }
+}
+
+impl<'a> BadRegistrationCmd<'a> {
+    pub fn new(message: String) -> BadRegistrationCmd<'a> {
+        BadRegistrationCmd {
+            cmd_type: BadRegistrationCmd::get_cmd_type(),
+            message
+        }
+    }
+}
+
+//#[derive(Serialize, Deserialize, Debug)]
+//pub struct GoodRegistrationCmd<'a> {
+//    pub cmd_type: &'a str,
+//    pub nickname: String
+//}
+//
+//impl<'a> CmdType<'a> for GoodRegistrationCmd<'a> {
+//    fn get_cmd_type() -> &'a str {
+//        CMD_TYPE_GOOD_REG
+//    }
+//}
+//
+//impl<'a> GoodRegistrationCmd<'a> {
+//    pub fn new(nickname: String) -> GoodRegistrationCmd<'a> {
+//        GoodRegistrationCmd {
+//            cmd_type: GoodRegistrationCmd::get_cmd_type(),
+//            nickname
+//        }
+//    }
+//}
+
+//#[derive(Serialize, Deserialize, Debug)]
+//pub struct RegisterPlayerCmd {
+//    pub guest_id: String,
+//    pub nickname: String,
+//}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(tag = "cmd_type")]
+pub enum IncomingCmdType {
+    RegisterPlayer {nickname: String},
+    Move {x: i16, y: i16},
+    Attack
+}
+
+/// Команда игрока для сервера
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ClientCmd {
+    #[serde(default)]
+    pub player_id: String,
+    pub cmd: IncomingCmdType,
+}
+
+enum OutgoingCmd {
+
 }

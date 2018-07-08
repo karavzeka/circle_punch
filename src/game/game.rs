@@ -2,12 +2,13 @@ extern crate websocket;
 extern crate serde_json;
 
 use super::{Arena, Player, Wave};
+use super::command::GuestIdCmd;
 
 use config::Config;
 use std::net::TcpStream;
 use std::collections::HashMap;
 use std::path::Path;
-use game::command::{ClientCmd, ServerCmd};
+use game::command::{ClientCmd, ServerCmd, IncomingCmdType};
 use controller::CollisionController;
 use websocket::{OwnedMessage};
 
@@ -15,6 +16,7 @@ const MAP_CONF_DIR: &str = "config-rs/map";
 
 pub struct Game {
     pub arena: Option<Arena>,
+    pub guests: HashMap<String, Player>,
     pub players: HashMap<String, Player>,
     pub disconnected_players: Vec<String>,
     pub collision_controller: CollisionController,
@@ -25,6 +27,7 @@ impl Game {
     pub fn new() -> Game {
         Game {
             arena: None,
+            guests: HashMap::new(),
             players: HashMap::new(),
             disconnected_players: Vec::new(),
             collision_controller: CollisionController::new(),
@@ -40,17 +43,9 @@ impl Game {
 
     /// Create new player
     pub fn make_player(&mut self, player_id: String, sender: websocket::sender::Writer<TcpStream>) {
-        let (spawn_x, spawn_y) = self.arena.as_ref().unwrap().get_spawn_pos(&self.players);
-
         let mut player = Player::new(player_id.clone(), sender);
-        player.set_position(spawn_x, spawn_y);
         self.send_map(&mut player);
-        self.players.insert(player_id.clone(), player);
-
-        // To show health of all players for new player
-        for player in self.players.values_mut() {
-            player.is_health_changed = true;
-        }
+        self.guests.insert(player_id.clone(), player);
     }
 
     /// Respawn player
@@ -71,21 +66,54 @@ impl Game {
     /// Remove palayer
     pub fn remove_player(&mut self, player_id: String) {
         self.players.remove(&player_id);
+        self.guests.remove(&player_id);
         self.disconnected_players.push(player_id);
     }
 
     /// Process player command
-    pub fn process_command(&mut self, cmd: ClientCmd) {
-        let player = match self.players.get_mut(&cmd.player_id) {
+    pub fn process_command(&mut self, client_cmd: ClientCmd) {
+        // Register command
+        match client_cmd.cmd {
+            IncomingCmdType::RegisterPlayer {ref nickname} => {
+                for player in self.players.values() {
+                    if player.nickname == *nickname {
+                        self.guests.get_mut(&client_cmd.player_id).unwrap().bad_registration_answer();
+                        return;
+                    }
+                }
+
+                match self.guests.remove(&client_cmd.player_id) {
+                    Some(mut player) => {
+                        player.nickname = nickname.clone();
+                        let (spawn_x, spawn_y) = self.arena.as_ref().unwrap().get_spawn_pos(&self.players);
+                        player.set_position(spawn_x, spawn_y);
+                        self.players.insert(client_cmd.player_id.clone(), player);
+
+                        // To show health of all players for new player
+                        for player in self.players.values_mut() {
+                            player.is_health_changed = true;
+                        }
+                    },
+                    None => {
+                        panic!("Player '{}' not found in guest stack.", &client_cmd.player_id);
+                    }
+                }
+            }
+            _ => ()
+        }
+
+        // Any other command
+        let player = match self.players.get_mut(&client_cmd.player_id) {
             Some(player) => player,
             None => {
-                panic!("Player '{}' not found in stack.", &cmd.player_id);
+                panic!("Player '{}' not found in stack.", &client_cmd.player_id);
             }
         };
 
-        player.set_move_to(cmd.move_vector.x, cmd.move_vector.y);
-        if cmd.attack {
-            player.attack();
+        match client_cmd.cmd {
+            IncomingCmdType::Move {x, y} => player.set_move_to(x, y),
+            IncomingCmdType::Attack => player.attack(),
+            _ => ()
         }
     }
 

@@ -4,11 +4,6 @@ class ClientCmd
 {
     constructor()
     {
-        this.move_vector = {
-            x: 0,
-            y: 0
-        };
-        this.attack = false;
         this.readyForSend = false;
     }
 
@@ -17,7 +12,6 @@ class ClientCmd
      */
     toDefault()
     {
-        this.attack = false;
         this.readyForSend = false;
     }
 

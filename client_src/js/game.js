@@ -55,13 +55,9 @@ function initEvents(arena)
         if (!isKeyPressed(event.keyCode) && document.activeElement.tagName !== 'INPUT' && GAME_KEYS[event.keyCode] !== undefined) {
             input.keys[event.keyCode] = true;
 
-            global.keysQueue.push(new KeyAction(event.keyCode, KEY_DOWN));
-
-            // let player = arena.getMainPlayer();
-            // if (player !== null) {
-
-                // player.updateCmd();
-            // }
+            if (arena.issetMainPlayer()) {
+                global.keysQueue.push(new KeyAction(event.keyCode, KEY_DOWN));
+            }
 
             event.preventDefault();
         }
@@ -101,27 +97,55 @@ function initEvents(arena)
         });
 
     // Other events
-    document.getElementById('connect-button').addEventListener('click', function () {
+    document.getElementById('connect-button').addEventListener('click', function (event) {
         let serverIp = document.getElementById('server-ip').value;
-        wsController.connect(serverIp);
+        let isConnected = wsController.connect(serverIp);
+
+        if (isConnected) {
+            for (let input of document.getElementById('connection-form').children) {
+                input.setAttribute('disabled', 'disabled');
+            }
+
+            document.getElementById('connected-info').style.display = 'block';
+            document.getElementById('name-input').focus();
+        }
+
+        event.preventDefault();
+    });
+
+    document.getElementById('join-button').addEventListener('click', function (event) {
+        let nickname = document.getElementById('name-input').value;
+
+        if (nickname) {
+            let cmd = {
+                cmd_type: 'RegisterPlayer',
+                nickname: nickname
+            };
+
+            wsController.send(JSON.stringify(cmd));
+        }
+
+        event.preventDefault();
     });
 }
 
 function processFrame(arena)
 {
-    if (arena.issetMainPlayer()) {
-        arena.update();
-        arena.draw();
+    arena.update();
+    arena.draw();
 
+    if (arena.issetMainPlayer()) {
         let player = arena.getMainPlayer();
         player.updateCmd(global.keysQueue);
 
-        let playerCmd = player.getCmd();
-        if (playerCmd.isReadyForSend()) {
-            // console.log(JSON.stringify(playerCmd));
-            WsController.getInstance().send(JSON.stringify(playerCmd));
+        let playerCmdList = player.getCmdList();
+        for (let playerCmd of playerCmdList) {
+            if (playerCmd.isReadyForSend()) {
+                console.log(JSON.stringify(playerCmd));
+                WsController.getInstance().send(JSON.stringify(playerCmd));
+            }
+            playerCmd.toDefault();
         }
-        playerCmd.toDefault();
     }
 
     if (global.stopGame) {

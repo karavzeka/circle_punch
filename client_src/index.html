@@ -18,16 +18,22 @@
             <span>FPS:</span>
             <span id="fps">∞</span>
         </div>
-        <div>
+        <form id="connection-form">
             <input type="text" id="server-ip" value="127.0.0.1">
             <button id="connect-button">Connect</button>
-        </div>
-        <div id="ws-notification"></div>
-        <div>
-            <pre>move - [w a s d] or [← ↑ → ↓]</pre>
-        </div>
-        <div>
-            <pre>attack - [space]</pre>
+        </form>
+        <div id="connected-info">
+            <form>
+                <input type="text" id="name-input" placeholder="Enter your nickname">
+                <button id="join-button">Join to game</button>
+            </form>
+            <div id="ws-notification"></div>
+            <div>
+                <pre>move - [w a s d] or [← ↑ → ↓]</pre>
+            </div>
+            <div>
+                <pre>attack - [space]</pre>
+            </div>
         </div>
     </div>
     <div id="received"></div>
@@ -43,6 +49,8 @@
     <script type="text/javascript" src="js/WsController.js"></script>
     <script type="text/javascript" src="js/ServerCmd.js"></script>
     <script type="text/javascript" src="js/ClientCmd.js"></script>
+    <script type="text/javascript" src="js/ClientCmdMove.js"></script>
+    <script type="text/javascript" src="js/ClientCmdAttack.js"></script>
     <script type="text/javascript" src="js/System.js"></script>
     <script type="text/javascript" src="js/game.js"></script>
 </body>

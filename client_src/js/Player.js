@@ -2,14 +2,16 @@
 
 class Player
 {
-    constructor(id, name, isMain = false)
+    constructor(id, nickname, isMain = false)
     {
         this.id = id;
-        this.name = name;
+        this.nickname = nickname;
         this.isMain = isMain;
-        this.cmd = null;
+        this.moveCmd = null;
+        this.attackCmd = null;
         if (isMain) {
-            this.cmd = new ClientCmd();
+            this.moveCmd = new ClientCmdMove();
+            this.attackCmd = new ClientCmdAttack();
         }
 
         this.arena = null;
@@ -139,42 +141,41 @@ class Player
             let keyAction = keysQueue.pop();
             if (keyAction.code === GAME_KEYS.VK_D || keyAction.code === GAME_KEYS.VK_RIGHT) {
                 if (keyAction.action === KEY_DOWN) {
-                    this.cmd.move_vector.x++;
+                    this.moveCmd.move_vector.x++;
                 } else {
-                    this.cmd.move_vector.x--;
+                    this.moveCmd.move_vector.x--;
                 }
             }
             if (keyAction.code === GAME_KEYS.VK_A || keyAction.code === GAME_KEYS.VK_LEFT) {
                 if (keyAction.action === KEY_DOWN) {
-                    this.cmd.move_vector.x--;
+                    this.moveCmd.move_vector.x--;
                 } else {
-                    this.cmd.move_vector.x++;
+                    this.moveCmd.move_vector.x++;
                 }
             }
             if (keyAction.code === GAME_KEYS.VK_W || keyAction.code === GAME_KEYS.VK_UP) {
                 if (keyAction.action === KEY_DOWN) {
-                    this.cmd.move_vector.y--;
+                    this.moveCmd.move_vector.y--;
                 } else {
-                    this.cmd.move_vector.y++;
+                    this.moveCmd.move_vector.y++;
                 }
             }
             if (keyAction.code === GAME_KEYS.VK_S || keyAction.code === GAME_KEYS.VK_DOWN) {
                 if (keyAction.action === KEY_DOWN) {
-                    this.cmd.move_vector.y++;
+                    this.moveCmd.move_vector.y++;
                 } else {
-                    this.cmd.move_vector.y--;
+                    this.moveCmd.move_vector.y--;
                 }
             }
-            this.cmd.readyForSend = true;
+            this.moveCmd.readyForSend = true;
         }
         if (isKeyPressed(GAME_KEYS.VK_SPACE)) {
-            this.cmd.attack = true;
-            this.cmd.readyForSend = true;
+            this.attackCmd.readyForSend = true;
         }
     }
 
-    getCmd()
+    getCmdList()
     {
-        return this.cmd;
+        return [this.moveCmd, this.attackCmd];
     }
 }

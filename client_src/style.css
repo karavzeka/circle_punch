@@ -15,3 +15,8 @@
 #ws-error {
     color: darkred;
 }
+
+#connected-info {
+    display: none;
+    margin-top: 20px;
+}

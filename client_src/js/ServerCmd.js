@@ -2,6 +2,7 @@
 
 const CMD_TYPE_PLAYERS = 'players';
 const CMD_TYPE_MAP = 'map';
+const CMD_TYPE_BAD_REG = 'bad_reg';
 
 class ServerCmd
 {
@@ -23,6 +24,9 @@ class ServerCmd
             case CMD_TYPE_MAP:
                 this.processMapCmd(cmd);
                 break;
+            case CMD_TYPE_BAD_REG:
+                this.processBadRegCmd(cmd);
+                break;
         }
     }
 
@@ -34,14 +38,14 @@ class ServerCmd
                 if (this.arena.issetMainPlayer()) {
                     player = this.arena.getMainPlayer();
                 } else {
-                    player = new Player(playerId, 'Super', true);
+                    player = new Player(playerId, playerCmd.nickname, true);
                     this.arena.setMainPlayer(player);
                 }
             } else {
                 if (this.arena.issetPlayer(playerId)) {
                     player = this.arena.getPlayer(playerId);
                 } else {
-                    player = new Player(playerId, 'Some', false);
+                    player = new Player(playerId, playerCmd.nickname, false);
                     this.arena.addPlayer(player);
                 }
             }
@@ -135,5 +139,10 @@ class ServerCmd
                 );
             }
         }
+    }
+
+    processBadRegCmd(cmd)
+    {
+        alert(cmd.message);
     }
 }

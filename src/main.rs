@@ -23,7 +23,7 @@ use websocket::OwnedMessage;
 use websocket::sync::Server;
 
 use game::{Game};
-use game::command::{ClientCmd};
+use game::command::{ClientCmd, IncomingCmdType};
 
 const FPS: u64 = 60u64;
 const TICK_MS: u64 = (1000u64 / FPS);
@@ -53,7 +53,6 @@ fn main() {
         loop {
             let cmd: ClientCmd = command_rx.recv().unwrap();
             game_glob_copy.lock().unwrap().process_command(cmd);
-//            println!("Recieved x: {}, y: {}", cmd.move_vector.x, cmd.move_vector.y);
         }
     });
 
@@ -86,18 +85,19 @@ fn main() {
 
                 match message {
                     OwnedMessage::Text(txt) => {
-                        let mut cmd_in: ClientCmd;
-                        match serde_json::from_str(&txt) {
-                            Ok(cmd) => {
-                                cmd_in = cmd;
+                        //TODO возможно надо все команды запихнуть в enum (https://serde.rs/enum-representations.html)
+                        let mut cmd_in: IncomingCmdType;
+                        let client_cmd: ClientCmd = match serde_json::from_str(&txt) {
+                            Ok(cmd_in) => {
+//                                println!("{:?}", cmd_in);
+                                ClientCmd {player_id: player_id.clone(), cmd: cmd_in}
                             }
                             Err(e) => {
                                 println!("Input message parse err: {:?}", e);
                                 return;
                             }
-                        }
-                        cmd_in.player_id = player_id.clone();
-                        command_tx.send(cmd_in).unwrap();
+                        };
+                        command_tx.send(client_cmd).unwrap();
                     }
                     OwnedMessage::Close(_) => {
                         println!("Client closed connection: {}", player_id);
