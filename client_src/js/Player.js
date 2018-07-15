@@ -27,6 +27,7 @@ class Player
         this.get_damage = false;
         this.healthRadius = 12;
         this.healthColor = 'rgba(0, 255, 0, 1)';
+        this.healthColor = 'rgba(0, 0, 0, 1)';
 
         this.bound = new Bound();
     }
@@ -104,6 +105,12 @@ class Player
             healthColorG = Math.ceil(255 * this.healthRelative * 2);
         }
         this.healthColor = 'rgba(' + healthColorR + ', ' + healthColorG + ', 0, 1)';
+
+        let nicknameColorR = healthColorR - 20;
+        nicknameColorR = nicknameColorR < 0 ? 0 : nicknameColorR;
+        let nicknameColorG = healthColorG - 80;
+        nicknameColorG = nicknameColorG < 0 ? 0 : nicknameColorG;
+        this.nicknameColor = 'rgba(' + nicknameColorR + ', ' + nicknameColorG + ', 0, 1)';
     }
 
     /**
@@ -132,6 +139,13 @@ class Player
         ctx.strokeStyle = this.healthColor;
         ctx.lineWidth = 3;
         ctx.stroke();
+
+        // Drawing nickname
+        ctx.beginPath();
+        ctx.textAlign = 'center';
+        ctx.font = '11px sans-serif';
+        ctx.fillStyle = this.nicknameColor;
+        ctx.fillText(this.nickname, x, y - this.radius - 4);
     }
 
     updateCmd(keysQueue)
