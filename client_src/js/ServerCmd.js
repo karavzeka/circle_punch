@@ -83,6 +83,12 @@ class ServerCmd
                 }
             }
         }
+
+        // Обновление счета
+        if (cmd.score_list !== undefined) {
+            console.log(cmd.score_list);
+            this.arena.score.update(cmd.score_list)
+        }
     }
 
     processMapCmd(cmd)

@@ -1,3 +1,16 @@
+@import 'https://fonts.googleapis.com/css?family=Montserrat:300,400,700';
+
+* {
+    padding: 0;
+    margin: 0;
+    font-family: Montserrat, sans-serif;
+    font-style: normal;
+}
+
+body {
+    padding: 20px 0 0 20px;
+}
+
 #viewport-frame {
     float: left;
 }
@@ -19,4 +32,28 @@
 #connected-info {
     display: none;
     margin-top: 20px;
+}
+
+#score {
+    width: 100%;
+    margin-top: 30px;
+    border-collapse: collapse;
+    border-radius: 5px;
+    color: #fff;
+    background: #34495e;
+}
+
+#score th {
+    color: #dd5;
+}
+
+#score th,
+#score td {
+    padding: 6px;
+    text-align: left;
+}
+
+#score tr th:last-child,
+#score tr td:last-child {
+    width: 55px;
 }

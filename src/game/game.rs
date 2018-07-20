@@ -6,7 +6,7 @@ use super::{Arena, Player, Wave};
 use std::net::TcpStream;
 use std::collections::HashMap;
 use std::path::Path;
-use game::command::{ClientCmd, ServerCmd, IncomingCmdType};
+use game::command::{ClientCmd, ServerCmd, IncomingCmdType, ScoreCmd};
 use controller::CollisionController;
 use websocket::{OwnedMessage};
 
@@ -19,6 +19,8 @@ pub struct Game {
     pub disconnected_players: Vec<String>,
     pub collision_controller: CollisionController,
     pub waves: Vec<Wave>,
+
+    pub update_score: bool,
 }
 
 impl Game {
@@ -30,6 +32,7 @@ impl Game {
             disconnected_players: Vec::new(),
             collision_controller: CollisionController::new(),
             waves: Vec::new(),
+            update_score: false,
         }
     }
 
@@ -59,6 +62,8 @@ impl Game {
         player.health = 100.0;
         player.is_dead = false;
         player.is_health_changed = true;
+
+        self.update_score = true;
     }
 
     /// Remove palayer
@@ -66,6 +71,8 @@ impl Game {
         self.players.remove(&player_id);
         self.guests.remove(&player_id);
         self.disconnected_players.push(player_id);
+
+        self.update_score = true;
     }
 
     /// Process player command
@@ -91,6 +98,8 @@ impl Game {
                         for player in self.players.values_mut() {
                             player.is_health_changed = true;
                         }
+
+                        self.update_score = true;
                     },
                     None => {
                         panic!("Player '{}' not found in guest stack.", &client_cmd.player_id);
@@ -123,11 +132,13 @@ impl Game {
         let player_ids: Vec<String> = self.players.keys().map(|key| key.clone()).collect();
         for (i, player_id_i) in player_ids.iter().enumerate() {
             let mut is_dead = false;
+            let mut update_score_for = None;
             // Updating player state
             {
                 let player_i = self.players.get_mut(player_id_i).unwrap();
                 if player_i.is_dead {
                     is_dead = player_i.is_dead;
+                    update_score_for = player_i.last_hit_by.clone();
                 }
 
                 if player_i.attack {
@@ -139,6 +150,13 @@ impl Game {
             if is_dead {
                 self.respawn_player(player_id_i);
             }
+            // Update score for killer
+            match update_score_for {
+                Some(hit_player_id) => {
+                    self.players.get_mut(&hit_player_id).unwrap().score += 1;
+                },
+                None => ()
+            }
             // Finding player-player collisions
             {
                 let player_i = self.players.get(player_id_i).unwrap();
@@ -149,8 +167,11 @@ impl Game {
                 }
                 self.collision_controller.detect_player_vs_wall(player_i, self.arena.as_ref().unwrap().walls.as_ref());
                 self.collision_controller.detect_player_vs_spike(player_i, self.arena.as_ref().unwrap().spikes.as_ref());
-                self.collision_controller.detect_player_vs_wave(player_i, self.waves.as_mut());
                 // Immutable borrow of player_i ends here
+            }
+            {
+                let mut player_i = self.players.get_mut(player_id_i).unwrap();
+                self.collision_controller.detect_player_vs_wave(player_i, self.waves.as_mut());
             }
 
             // Applying collisions
@@ -176,6 +197,8 @@ impl Game {
             self.waves.remove(*wave_index);
         }
 
+        cmd.score_list = self.generate_score_list();
+
         // Individual modification and sending command
         for i in 0..cmd.players.len() {
             cmd.players[i].it_is_you = true;
@@ -186,6 +209,8 @@ impl Game {
 
             cmd.players[i].it_is_you = false;
         }
+
+        self.update_score = false;
     }
 
     /// Send map state
@@ -199,5 +224,18 @@ impl Game {
     pub fn pong(&mut self, player_id: String, data: Vec<u8>) {
         let player = self.players.get_mut(&player_id).unwrap();
         player.sender.send_message(&OwnedMessage::Pong(data)).unwrap();
+    }
+
+    pub fn generate_score_list(&self) -> Vec<ScoreCmd> {
+        let mut score_list = Vec::new();
+        if self.update_score {
+            let mut players_vec: Vec<(&String, &Player)> = self.players.iter().collect();
+            players_vec.sort_by(|a, b| b.1.score.cmp(&a.1.score));
+            score_list = players_vec.iter().map(|cortege| {
+                ScoreCmd::new(cortege.1.nickname.clone(), cortege.1.score)
+            }).collect();
+        }
+
+        score_list
     }
 }

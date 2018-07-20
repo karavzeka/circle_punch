@@ -6,6 +6,7 @@ class Arena
     {
         this.players = {};
         this.mainPlayer = null;
+        this.score = new Score();
         // Width and height of arena (not canvas)
         this.width = 0;
         this.height = 0;

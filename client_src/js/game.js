@@ -141,7 +141,6 @@ function processFrame(arena)
         let playerCmdList = player.getCmdList();
         for (let playerCmd of playerCmdList) {
             if (playerCmd.isReadyForSend()) {
-                console.log(JSON.stringify(playerCmd));
                 WsController.getInstance().send(JSON.stringify(playerCmd));
             }
             playerCmd.toDefault();

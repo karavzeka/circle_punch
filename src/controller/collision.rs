@@ -197,7 +197,7 @@ impl CollisionController {
         }
     }
 
-    pub fn detect_player_vs_wave(&mut self, player: &Player, waves: &mut Vec<Wave>) {
+    pub fn detect_player_vs_wave(&mut self, player: &mut Player, waves: &mut Vec<Wave>) {
         for wave in waves.iter_mut() {
             if wave.owner_id == player.id || wave.collided_with.contains(&player.id) {
                 continue;
@@ -219,6 +219,8 @@ impl CollisionController {
                     damage: 1.0,
                 };
                 self.add_collision(player.id.clone(), collision);
+
+                player.last_hit_by = Some(wave.owner_id.clone());
             }
         }
     }

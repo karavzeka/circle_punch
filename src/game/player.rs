@@ -35,8 +35,12 @@ pub struct Player {
 
     healing_counter: u8,
 
+    pub score: i32,
+
     attack_delay: i64,
     last_attack: DateTime<Utc>,
+
+    pub last_hit_by: Option<String>,
 
     // Actions
     pub move_to: Vector2<i16>,
@@ -62,9 +66,12 @@ impl Player {
             is_health_changed: true,
             is_dead: false,
             healing_counter: 0,
+            score: 0,
 
             attack_delay: ATTACK_DELAY,
             last_attack: Utc::now().checked_sub_signed(Duration::seconds(ATTACK_DELAY)).unwrap(),
+
+            last_hit_by: None,
 
             // Actions
             move_to: Vector2::zero(),

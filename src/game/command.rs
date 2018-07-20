@@ -18,6 +18,8 @@ pub struct ServerCmd<'a> {
     pub waves: Vec<WaveCmd>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub disconnected_players: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub score_list: Vec<ScoreCmd>,
 }
 
 impl<'a> ServerCmd<'a> {
@@ -30,6 +32,7 @@ impl<'a> ServerCmd<'a> {
             players: Vec::new(),
             waves: Vec::new(),
             disconnected_players: Vec::new(),
+            score_list: Vec::new(),
         }
     }
 }
@@ -102,6 +105,21 @@ impl WaveCmd {
             position: Position {x, y},
             r,
             is_dead
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct ScoreCmd {
+    pub nickname: String,
+    pub score: i32,
+}
+
+impl ScoreCmd {
+    pub fn new(nickname: String, score: i32) -> ScoreCmd {
+        ScoreCmd {
+            nickname,
+            score
         }
     }
 }
