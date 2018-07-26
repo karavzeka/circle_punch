@@ -14,7 +14,6 @@ class Score
         let rows = this.tbody.getElementsByTagName('tr');
         let len = rows.length;
         for (let i = 1; i < len; i++) {
-            console.log(rows.length);
             rows.item(1).remove();
         }
 
