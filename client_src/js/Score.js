@@ -12,9 +12,10 @@ class Score
     update(scoreList)
     {
         let rows = this.tbody.getElementsByTagName('tr');
-        for (let i = 1; i < rows.length; i++) {
-            this.tbody.removeChild(rows.item(i));
-            rows.item(i).remove();
+        let len = rows.length;
+        for (let i = 1; i < len; i++) {
+            console.log(rows.length);
+            rows.item(1).remove();
         }
 
         for (let scoreItem of scoreList) {
