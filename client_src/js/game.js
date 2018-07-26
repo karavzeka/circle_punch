@@ -3,7 +3,7 @@
 //input objects
 let input = {
     // mouse_down:  false,
-    keys: new Array(256),
+    keys: [],
 };
 
 const GAME_KEYS = {
@@ -45,7 +45,7 @@ const DEBUG_MODE = url.searchParams.has('debug') && url.searchParams.get('debug'
 
 function isKeyPressed(code)
 {
-    return input.keys[code];
+    return input.keys[code] === true;
 }
 
 function initEvents(arena)
@@ -64,9 +64,11 @@ function initEvents(arena)
     });
 
     document.addEventListener(KEY_UP, function (event) {
-        input.keys[event.keyCode] = false;
-        global.keysQueue.push(new KeyAction(event.keyCode, KEY_UP));
-        event.preventDefault();
+        if (document.activeElement.tagName !== 'INPUT') {
+            input.keys[event.keyCode] = false;
+            global.keysQueue.push(new KeyAction(event.keyCode, KEY_UP));
+            event.preventDefault();
+        }
     });
 
     // WebSocket events
