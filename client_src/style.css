@@ -20,8 +20,10 @@ body {
 }
 
 #game-info {
+    position: relative;
     float: left;
     margin-left: 20px;
+    min-width: 370px;
     max-width: 620px;
 }
 
@@ -29,18 +31,22 @@ body {
     color: darkred;
 }
 
-#connected-info {
+#nickname-form,
+#ws-notification {
     display: none;
-    margin-top: 20px;
+}
+
+.panel {
+    border-radius: 5px;
+    color: #fff;
+    background: #34495e;
+    padding: 6px;
+    margin-bottom: 8px;
 }
 
 #score {
     width: 100%;
-    margin-top: 30px;
     border-collapse: collapse;
-    border-radius: 5px;
-    color: #fff;
-    background: #34495e;
 }
 
 #score th {

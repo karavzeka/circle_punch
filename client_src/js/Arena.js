@@ -6,7 +6,7 @@ class Arena
     {
         this.players = {};
         this.mainPlayer = null;
-        this.score = new Score();
+        this.score = new Score(this);
         // Width and height of arena (not canvas)
         this.width = 0;
         this.height = 0;
@@ -79,6 +79,9 @@ class Arena
     {
         this.mainPlayer = player;
         this.mainPlayer.setArena(this);
+
+        // Hide nickname form
+        document.getElementById('nickname-form').style.display = 'none';
     }
 
     /**

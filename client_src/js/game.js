@@ -81,6 +81,13 @@ function initEvents(arena)
 
     wsController
         .setOnOpen(function (event) {
+            // Hide connect form
+            document.getElementById('connection-form').style.display = 'none';
+
+            // Focus on nickname input
+            document.getElementById('nickname-form').style.display = 'block';
+            document.getElementById('name-input').focus();
+
             processFrame(arena);
         });
 
@@ -102,14 +109,12 @@ function initEvents(arena)
     document.getElementById('connect-button').addEventListener('click', function (event) {
         let serverIp = document.getElementById('server-ip').value;
         let isConnected = wsController.connect(serverIp);
-
+        console.log(wsController.isOpen());
         if (isConnected) {
-            for (let input of document.getElementById('connection-form').children) {
-                input.setAttribute('disabled', 'disabled');
-            }
+            // for (let input of document.getElementById('connection-form').children) {
+            //     input.setAttribute('disabled', 'disabled');
+            // }
 
-            document.getElementById('connected-info').style.display = 'block';
-            document.getElementById('name-input').focus();
         }
 
         event.preventDefault();
@@ -158,7 +163,22 @@ function processFrame(arena)
     setTimeout(function () {processFrame(arena);}, DT * 1000);
 }
 
+function tryAutoRun()
+{
+    let ipInput = document.getElementById('server-ip');
+
+    let host = window.location.hostname;
+    if (!host) {
+        host = DEFAULT_IP;
+    }
+    ipInput.value = host;
+
+    let wsController = WsController.getInstance();
+    wsController.connect(host);
+}
+
 // Run
 let canvas = document.getElementById('canvas');
 let arena = new Arena(canvas);
 initEvents(arena);
+tryAutoRun();

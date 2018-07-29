@@ -18,16 +18,16 @@
             <span>FPS:</span>
             <span id="fps">∞</span>
         </div>
-        <form id="connection-form">
+        <form id="connection-form" class="panel">
             <input type="text" id="server-ip" value="127.0.0.1">
             <button id="connect-button">Connect</button>
         </form>
-        <div id="connected-info">
-            <form>
-                <input type="text" id="name-input" placeholder="Enter your nickname">
-                <button id="join-button">Join to game</button>
-            </form>
-            <div id="ws-notification"></div>
+        <form id="nickname-form" class="panel">
+            <input type="text" id="name-input" placeholder="Enter your nickname">
+            <button id="join-button">Join to game</button>
+        </form>
+        <div id="ws-notification"></div>
+        <div class="panel">
             <div>
                 <pre>move - [w a s d] or [← ↑ → ↓]</pre>
             </div>
@@ -35,7 +35,7 @@
                 <pre>attack - [space]</pre>
             </div>
         </div>
-        <table id="score">
+        <table id="score" class="panel">
             <tr class="head-row">
                 <th>Nickname</th>
                 <th>Score</th>
