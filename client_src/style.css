@@ -27,12 +27,8 @@ body {
     max-width: 620px;
 }
 
-#ws-error {
-    color: darkred;
-}
-
 #nickname-form,
-#ws-notification {
+#ws-error {
     display: none;
 }
 
@@ -42,6 +38,10 @@ body {
     background: #34495e;
     padding: 6px;
     margin-bottom: 8px;
+}
+
+.error-panel {
+    background: darkred;
 }
 
 #score {

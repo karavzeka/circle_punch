@@ -96,26 +96,21 @@ function initEvents(arena)
             global.stopGame = true;
             arena.removeAllPlayers();
 
-            let notificationElement = document.getElementById('ws-notification');
+            let notificationElement = document.getElementById('ws-error');
+            notificationElement.style.display = 'block';
             let element = document.createElement('div');
             element.textContent = 'Disconnected [' + WsController.getCloseReason(event) + ']';
             notificationElement.appendChild(element);
             setTimeout(function () {
                 element.remove();
+                notificationElement.style.display = 'none';
             }, 20000);
         });
 
     // Other events
     document.getElementById('connect-button').addEventListener('click', function (event) {
         let serverIp = document.getElementById('server-ip').value;
-        let isConnected = wsController.connect(serverIp);
-        console.log(wsController.isOpen());
-        if (isConnected) {
-            // for (let input of document.getElementById('connection-form').children) {
-            //     input.setAttribute('disabled', 'disabled');
-            // }
-
-        }
+        wsController.connect(serverIp);
 
         event.preventDefault();
     });
