@@ -184,18 +184,14 @@ impl Game {
         }
 
         // Waves update
-        let mut dead_waves = Vec::new();
-        for (i, wave) in self.waves.iter_mut().enumerate() {
-            wave.update();
-            if wave.is_dead {
-                dead_waves.push(i);
-            }
-            cmd.waves.push(wave.generate_cmd());
-        }
-        // Remove dead waves
-        for wave_index in dead_waves.iter() {
-            self.waves.remove(*wave_index);
-        }
+        self.waves = self.waves.clone().into_iter()
+            .map(|mut wave| {
+                wave.update();
+                cmd.waves.push(wave.generate_cmd());
+                wave
+            })
+            .filter(|wave| !wave.is_dead)
+            .collect();
 
         cmd.score_list = self.generate_score_list();
 

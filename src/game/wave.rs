@@ -6,6 +6,7 @@ use chrono::prelude::Utc;
 
 const MAX_RADIUS: f32 = 75.0;
 
+#[derive(Clone, Debug)]
 pub struct Wave {
     id: i64,
     pub r: f32,
