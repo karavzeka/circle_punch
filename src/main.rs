@@ -41,7 +41,12 @@ fn main() {
     thread::spawn(move || {
         loop {
             thread::sleep(Duration::from_millis(TICK_MS));
-            game_glob_copy.lock().unwrap().update(TICK_MS as f32 / 1000.0);
+            match game_glob_copy.lock().unwrap().update(TICK_MS as f32 / 1000.0) {
+                Err(e) => {
+                    eprintln!("Error in game::update():\n{:}", e);
+                }
+                Ok(()) => ()
+            }
         }
     });
 
@@ -65,7 +70,13 @@ fn main() {
         let (mut receiver, sender) = client.split().unwrap();
 
         // Creating new player
-        game_glob.lock().unwrap().make_player(player_id.clone(), sender);
+        match game_glob.lock().unwrap().make_player(player_id.clone(), sender) {
+            Err(e) => {
+                eprintln!("Error in game::make_player():\n{:}", e);
+                continue;
+            }
+            Ok(()) => ()
+        }
 
         // Listen connections and process incoming messages
         let game_glob_copy = game_glob.clone();

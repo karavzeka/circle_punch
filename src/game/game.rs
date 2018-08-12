@@ -6,6 +6,7 @@ use super::{Arena, Player, Wave};
 use std::net::TcpStream;
 use std::collections::HashMap;
 use std::path::Path;
+use std::error::Error;
 use game::command::{ClientCmd, ServerCmd, IncomingCmdType, ScoreCmd};
 use controller::CollisionController;
 use websocket::{OwnedMessage};
@@ -43,10 +44,12 @@ impl Game {
     }
 
     /// Create new player
-    pub fn make_player(&mut self, player_id: String, sender: websocket::sender::Writer<TcpStream>) {
+    pub fn make_player(&mut self, player_id: String, sender: websocket::sender::Writer<TcpStream>) -> Result<(), Box<Error>> {
         let mut player = Player::new(player_id.clone(), sender);
-        self.send_map(&mut player);
+        self.send_map(&mut player)?;
         self.guests.insert(player_id.clone(), player);
+
+        Ok(())
     }
 
     /// Respawn player
@@ -125,7 +128,7 @@ impl Game {
     }
 
     /// Send game state to all players
-    pub fn update(&mut self, dt: f32) {
+    pub fn update(&mut self, dt: f32) -> Result<(), Box<Error>> {
         let mut cmd = ServerCmd::new();
         cmd.disconnected_players = self.disconnected_players.clone();
 
@@ -200,21 +203,25 @@ impl Game {
             cmd.players[i].it_is_you = true;
             let player = self.players.get_mut(&cmd.players[i].player_id).unwrap();
 
-            let json = serde_json::to_string(&cmd).unwrap();
-            player.sender.send_message(&OwnedMessage::Text(json)).unwrap();
+            let json = serde_json::to_string(&cmd)?;
+            player.sender.send_message(&OwnedMessage::Text(json))?;
 
             cmd.players[i].it_is_you = false;
         }
 
         self.update_score = false;
+
+        Ok(())
     }
 
     /// Send map state
-    fn send_map(&self, player: &mut Player) {
+    fn send_map(&self, player: &mut Player) -> Result<(), Box<Error>> {
         let arena = self.arena.as_ref().unwrap();
         let map_cmd = arena.generate_map_cmd();
-        let json = serde_json::to_string(&map_cmd).unwrap();
-        player.sender.send_message(&OwnedMessage::Text(json)).unwrap();
+        let json = serde_json::to_string(&map_cmd)?;
+        player.sender.send_message(&OwnedMessage::Text(json))?;
+
+        Ok(())
     }
 
     pub fn pong(&mut self, player_id: String, data: Vec<u8>) {
