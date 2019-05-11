@@ -1,1 +1,1 @@
-web: ./target/debug/circle_punch
+web: ./target/release/circle_punch
